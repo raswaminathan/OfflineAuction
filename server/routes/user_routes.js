@@ -10,6 +10,18 @@ router.get('/', function(req, res, next){
     }
 });
 
+router.get('/all', function(req, res, next){
+    if (!req.session.user || !('username' in req.session.user)) {
+        res.status(401).json({noSession: true});
+    } else {
+        user_service.get_all_users().then(function(result) {
+            res.status(200).json(result);
+        }, function(error) {
+            res.status(403).json(error);
+        });
+    }
+});
+
 router.put('/', function(req, res, next){
     //create user
 
@@ -17,6 +29,18 @@ router.put('/', function(req, res, next){
         res.status(401).json({err: "no username or password provided"});
     } else {
         user_service.create_user(req.body).then(function(result) {
+            res.status(200).json(result);
+        }, function(error) {
+            res.status(403).json(error);
+        });
+    }
+});
+
+router.get('/getTeam', function(req, res, next){
+    if (!req.session.user || !('username' in req.session.user)) {
+        res.status(401).json({noSession: true});
+    } else {
+        user_service.get_team(req.session.user).then(function(result) {
             res.status(200).json(result);
         }, function(error) {
             res.status(403).json(error);

@@ -21,7 +21,7 @@ var client = redis.createClient();
 
 var views = require('./routes/views');
 // // var tag_routes = require('./routes/tags');
-// var user_routes = require('./routes/user_routes');
+var user_routes = require('./routes/user_routes');
 // var room_routes = require('./routes/room_routes');
 // var game_routes = require('./routes/game_routes');
 var image_routes = require('./routes/images');
@@ -31,6 +31,7 @@ var node_modules_routes = require('./routes/node_modules');
 var style_routes = require('./routes/styles');
 var bower_routes = require('./routes/bower')
 var initialize_tables = require('./services/initialize_tables');
+var initialize_player_list = require('./services/initialize_player_list');
 var create_admin = require('./services/create_admin');
 
 // var timer = require('./services/timer');
@@ -43,9 +44,7 @@ var create_admin = require('./services/create_admin');
 
 io.on('connection', function(socket){
   console.log('a user connected');
-  socket.on('chat message', function(msg){
-    io.emit('chat message', msg);
-  });
+
 });
 
 // Make io accessible to our router
@@ -73,7 +72,7 @@ app.use(session({
 app.use('/', views);
 //app.use('/views', views);
 // // app.use('/tag', tag_routes);
-// app.use('/user', user_routes);
+app.use('/user', user_routes);
 // app.use('/room', room_routes);
 // app.use('/game', game_routes);
 app.use('/images', image_routes);
@@ -84,7 +83,16 @@ app.use('/node_modules', node_modules_routes);
 app.use('/styles', style_routes);
 // app.use('/', shibboleth);
 
-initialize_tables.initializeDB(create_admin.createAdmin);
+
+var createAdminCallback = function() {
+  initialize_player_list.initialize();
+};
+
+var initializeDBCallback = function() {
+  create_admin.createAdmin(createAdminCallback);
+};
+
+initialize_tables.initializeDB(initializeDBCallback);
 
 http.listen(5000, function () {
   console.log('auction app listening on port 5000!');

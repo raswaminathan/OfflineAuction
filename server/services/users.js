@@ -25,7 +25,24 @@ function create_user(user){
     });
 
     return deferred.promise;
-}
+};
+
+function get_all_users() {
+    var deferred = q.defer();
+
+    var getUserCallback = function(result) {
+        if (result.error) {
+            deferred.reject(result);
+        } else {
+            deferred.resolve(result);
+        }
+    };
+
+    var getAllUsersQuery = user_query_builder.buildQueryForGetAllUsers();
+    basic_db_utility.performMultipleRowDBOperation(getAllUsersQuery, getUserCallback);
+
+    return deferred.promise;
+};
 
 function get_user(user) {
     var deferred = q.defer();
@@ -42,7 +59,24 @@ function get_user(user) {
     basic_db_utility.performSingleRowDBOperation(getUserQuery, getUserCallback);
 
     return deferred.promise;
-}
+};
+
+function get_team(user) {
+    var deferred = q.defer();
+
+    var getUserCallback = function(result) {
+        if (result.error) {
+            deferred.reject(result);
+        } else {
+            deferred.resolve(result);
+        }
+    };
+
+    var getTeamQuery = user_query_builder.buildQueryForGetTeam(user);
+    basic_db_utility.performMultipleRowDBOperation(getTeamQuery, getUserCallback);
+
+    return deferred.promise;
+};
 
 function delete_user(username, callback) {
 
@@ -64,11 +98,15 @@ function compare_passwords(password, user, callback) {
     });
 
     return deferred.promise;
-}
+};
+
+
 
 module.exports = {
     create_user: create_user,
     delete_user: delete_user,
     get_user: get_user,
-    compare_passwords: compare_passwords
+    compare_passwords: compare_passwords,
+    get_team: get_team,
+    get_all_users: get_all_users
 }
