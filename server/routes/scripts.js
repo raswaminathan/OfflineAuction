@@ -1,9 +1,10 @@
 var express = require('express');
 var router = express.Router();
 var app = express();
+var globals = require('../globals')
 
 // sendFile needs full path
-var basePath =  '/Users/rahulswaminathan/OfflineAuction/client/scripts';
+var basePath =  globals.clientBasePath + '/scripts';
 
 router.get('/app.js', function(req, res, next){
   res.sendFile(basePath + '/app.js');

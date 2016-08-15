@@ -30,8 +30,8 @@ var script_routes = require('./routes/scripts');
 var node_modules_routes = require('./routes/node_modules');
 var style_routes = require('./routes/styles');
 var bower_routes = require('./routes/bower')
-// var initialize_tables = require('./services/initialize_tables');
-// var create_admin = require('./services/create_admin');
+var initialize_tables = require('./services/initialize_tables');
+var create_admin = require('./services/create_admin');
 
 // var timer = require('./services/timer');
 
@@ -84,7 +84,7 @@ app.use('/node_modules', node_modules_routes);
 app.use('/styles', style_routes);
 // app.use('/', shibboleth);
 
-//initialize_tables.initializeDB(create_admin.createAdmin);
+initialize_tables.initializeDB(create_admin.createAdmin);
 
 http.listen(5000, function () {
   console.log('auction app listening on port 5000!');
