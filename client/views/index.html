@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="utf-8" />
+    <title></title>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular-route.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular-animate.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular-aria.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular-messages.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script type="text/javascript" src="bower_components/angular-playing-cards/angular-playing-cards.js"></script>
+
+    <script src="bower_components/angular-sanitize/angular-sanitize.min.js"></script>
+    <script src="bower_components/videogular/videogular.js"></script>
+    <script src="bower_components/videogular-controls/vg-controls.js"></script>
+    <script src="bower_components/videogular-overlay-play/vg-overlay-play.js"></script>
+    <script src="bower_components/videogular-poster/vg-poster.js"></script>
+    <script src="bower_components/videogular-buffering/vg-buffering.js"></script>
+
+    <script src="bower_components/moment/min/moment.min.js"></script>
+    <script src="bower_components/moment/min/locales.min.js"></script>
+    <script src="bower_components/humanize-duration/humanize-duration.js"></script>
+
+    <script type="text/javascript" src="scripts/directives/angular-timer.js"></script>
+
+    <script src="scripts/app.js"></script>
+    <script src="scripts/controllers/main_controller.js"></script>
+    <script src="scripts/controllers/register.js"></script>
+    <script src="scripts/controllers/rooms.js"></script>
+    <script src="scripts/controllers/room_modal.js"></script>
+    <script src="scripts/services/cards.js"></script>
+
+    
+    <script type="text/javascript" src="scripts/directives/modalShow.js"></script>
+    <script type="text/javascript" src="scripts/directives/angular-deck.js"></script>
+    <script type="text/javascript" src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
+    <script type="text/javascript" src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+
+    <link rel="stylesheet" href="bower_components/angular-playing-cards/angular-playing-cards.css"/>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css"/>
+   
+    <link rel="stylesheet" href="styles/main.css"/>
+
+</head>
+
+<body ng-app="LiarsPoker" ng-controller="MainCtrl">
+   <div class="container">
+        <div class="header">
+            <ul class="nav nav-pills pull-right">
+                <li><button class="btn btn-default btn-sm" ng-show="user.loggedIn" ng-click="logout()">Logout</button><li>
+                <li><button class="btn btn-default btn-sm" ng-click="goToRulesPage()">Rules</button></li>
+                <li><button class="btn btn-default btn-sm" ng-show="user.loggedIn" ng-click="goToRoomsPage()">Rooms</button></li>
+            </ul>
+        </div>
+
+        <div class="footer"></div>
+    </div>
+
+    <div class="row-fluid">
+        <div class="span3">
+            <div class='span9'>
+                <div class="body" ng-view=""></div>
+            </div>
+        </div>
+
+    </div>
+</body>    
+
+</html>

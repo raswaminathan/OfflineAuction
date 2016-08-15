@@ -1,0 +1,120 @@
+<div class="modal-dialog" ng-controller="RoomModalCtrl">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title">
+            {{selectedRoom.room_name}} - {{selectedRoom.room_state}}
+        </h4>
+
+<!--         <timer style="float:left;" ng-show="isMyTurn" autostart="false" finish-callback="timedOut()" interval="1000" countdown="60">{{seconds}} second{{secondsS}} left</timer>
+ -->        
+
+        <div>
+            {{}}
+        </div>
+        <button type="button" ng-show="hasEnteredRoom && !myReadyToStart && !gameStarted" ng-click="toggleReadyToStart()" class="btn btn-default">Ready!</button>
+        <button type="button" ng-show="hasEnteredRoom && myReadyToStart && !gameStarted" ng-click="toggleReadyToStart()" class="btn btn-default">Not Ready Anymore!</button>
+
+        <div ng-show="gameStarted">
+            <select>
+              <option disabled>Hand history</option>
+              <option disabled ng-repeat="hand in handHistory">{{hand.user.username}}: {{getReadableHand(hand.hand)}}</option>
+            </select><br>
+            Current Called Hand: {{getReadableHand(currentCalledHand)}}<br>
+            Total Cards: {{getTotalCards()}}
+        </div>
+    </div>
+
+     <div class="modal-body container">
+      
+        <h4><u> Current Members </u></h4>
+        <div ng-repeat="thisUser in usersInRoom track by $index">
+            <label style="color: {{thisUser.color}}">
+                {{thisUser.username}}
+            </label>
+            <span ng-show="gameStarted">
+                (has {{thisUser.number_of_cards}} cards)
+            </span>
+            <span ng-show="thisUser.isDealer == true && !hasCards && hasEnteredRoom">
+                Dealer
+                <button type="button" class="btn btn-default" ng-show="amIDealer()" ng-click="dealCards()">Deal Cards</button>
+            </span>
+            <span ng-show="thisUser.isTurn == true">
+                Is up
+            </span>
+        </div>
+
+        <h3 ng-show="hasCards && hasEnteredRoom"><u> My Cards </u></h3>
+        <div ng-show="hasCards && hasEnteredRoom" ng-repeat="card in myCards" style="display: inline">
+            <!-- {{card.value}} of {{card.suit}}s   -->
+            <!-- {{card.unicodeRepresentation}} -->
+            <img src="{{card.image}}" style="height:120px;">
+        </div>
+
+        <br><br>
+
+        <div ng-show="hasCards && isMyTurn && hasEnteredRoom">
+            <form name="myForm">
+                <fieldset class="form-group">
+                    <label> Hand type</label>
+                    <select ng-change="selectedHandType()" ng-model="myCalledHand.handType">
+                      <option ng-repeat="handType in handTypes" value="{{handType}}">{{handType}}</option>
+                    </select><br>
+                </fieldset>
+
+                <fieldset ng-show="showSuitChoice" class="form-group">
+                    <label> Suit</label>
+                    <select ng-model="myCalledHand.suit">
+                      <option ng-repeat="suit in suits" value="{{suit}}">{{suit}}</option>
+                    </select><br>
+                </fieldset>
+
+                <fieldset ng-show="showTopAndBottomValueChoice || showValueChoice" class="form-group">
+                    <label ng-show="showTopAndBottomValueChoice"> Top Value</label>
+                    <label ng-show="showValueChoice && !showTopAndBottomValueChoice"> Value</label>
+                    <select ng-model="myCalledHand.topValue">
+                      <option ng-repeat="value in values" value="{{value}}">{{value}}</option>
+                    </select><br>
+                </fieldset>
+
+                <fieldset ng-show="showTopAndBottomValueChoice" class="form-group">
+                    <label> Bottom Value</label>
+                    <select ng-model="myCalledHand.bottomValue">
+                      <option ng-repeat="value in values" value="{{value}}">{{value}}</option>
+                    </select><br>
+                </fieldset>
+
+                <button type="button" class="btn btn-primary" ng-click="callHand()">Call this hand</button>
+                <button type="button" class="btn btn-primary" ng-click="callRedraw()">Call Redraw</button>
+
+              </form>
+        </div>
+
+        <button type="button" class="btn btn-primary" ng-show="hasCards && hasEnteredRoom" ng-click="callBS()">Call BS</button>
+         
+     </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" ng-show="!alreadyInRoom && !gameStarted" ng-click="joinRoom()">Join Room</button>
+        <button type="button" class="btn btn-primary" ng-show="alreadyInRoom && !hasEnteredRoom" ng-click="enterRoom()">Enter Room</button>
+        <button type="button" class="btn btn-danger" ng-show="user.username == 'admin' && !hasEnteredRoom && !gameStarted" ng-click="deleteRoom()">Delete Room</button>
+        <button type="button" class="btn btn-danger" ng-show="alreadyInRoom && !hasEnteredRoom" ng-click="leaveRoom()">Leave Room</button>
+        <div id="scrollMessages" ng-show = "hasEnteredRoom" style="overflow: scroll; height:200px; text-align: left">
+            <div ng-repeat="message in allMessages track by $index">
+                <label>
+                    {{message.username}}:  {{message.message}}
+                </label><br>
+            </div>
+        </div>
+        <form ng-show="hasEnteredRoom">
+            <input type="text" class="form-control" placeholder="Enter Chat Message Here" ng-model="chatMessage">
+            <button type="submit" class="btn btn-primary" ng-click="sendMessage()">Send</button>
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-danger" style="float: left;" ng-show="alreadyInRoom" ng-click="leaveRoom()">Leave Room</button>
+
+        </form>
+        
+        <button type="button" ng-show="!hasEnteredRoom" class="btn btn-default" data-dismiss="modal">Close</button>
+
+      </div>
+    </div>
+</div>
