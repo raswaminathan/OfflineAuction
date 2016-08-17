@@ -24,7 +24,7 @@ var registerTimerEvents = function(timer, req) {
 
         if (users[currentHighBidIndex].remaining_roster_spots == 0) {
             users.splice(currentHighBidIndex, 1);
-            req.io.sockets.emit('user done ' + users[currentHighBidIndex].user_id);
+            req.io.sockets.emit('user done ', {user_id: users[currentHighBidIndex].user_id});
         }
         
         currentTurnIndex = findNextTurnIndex(users);
@@ -93,7 +93,7 @@ var stopTimer = function(timer) {
 };
 
 var emitTurnToNominateEvent = function(req, user_id) {
-    req.io.sockets.emit('user turn ' + user_id);
+    req.io.sockets.emit('user turn ', {user_id: user_id});
 };
 
 var emitPlayerNominatedEvent = function(req, player, startingBid) {
