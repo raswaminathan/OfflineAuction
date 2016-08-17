@@ -2,14 +2,6 @@ var express = require('express');
 var router = express.Router();
 var user_service = require('../services/users');
 
-router.get('/', function(req, res, next){
-    if (!req.session.user || !('username' in req.session.user)) {
-        res.status(401).json({noSession: true});
-    } else {
-        res.status(200).json(req.session.user);
-    }
-});
-
 router.get('/all', function(req, res, next){
     if (!req.session.user || !('username' in req.session.user)) {
         res.status(401).json({noSession: true});

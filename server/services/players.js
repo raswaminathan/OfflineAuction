@@ -22,6 +22,24 @@ function add_player(player) {
     return deferred.promise;
 };
 
+function get_all_available_players() {
+    var deferred = q.defer();
+
+    var getPlayersCallback = function(result) {
+        if (result.error) {
+            deferred.reject(result);
+        } else {
+            deferred.resolve(result);
+        }
+    };
+
+    var getAllPlayersQuery = player_query_builder.buildQueryForGetAllAvailablePlayers();
+    basic_db_utility.performMultipleRowDBOperation(getAllPlayersQuery, getPlayersCallback);
+
+    return deferred.promise;
+};
+
 module.exports = {
-    add_player: add_player
+    add_player: add_player,
+    get_all_available_players: get_all_available_players
 }

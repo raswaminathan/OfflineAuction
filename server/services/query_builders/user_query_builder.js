@@ -23,6 +23,14 @@ module.exports.buildQueryForGetAllUsers = function() {
             .toString();
 };
 
+module.exports.buildQueryForGetAllNonAdminUsers = function() {
+  
+    return squel.select()
+            .from("user")
+            .where("username != admin")
+            .toString();
+};
+
 module.exports.buildQueryForGetTeam = function(user) {
   
     return squel.select()

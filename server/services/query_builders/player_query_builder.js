@@ -9,3 +9,10 @@ module.exports.buildQueryForAddPlayer = function(player) {
             .toString();
 };
 
+module.exports.buildQueryForGetAllAvailablePlayers = function(player) {
+    return squel.select()
+            .from("player")
+            .where("available = 1")
+            .toString()
+};
+

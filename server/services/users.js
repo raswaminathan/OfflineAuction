@@ -44,6 +44,23 @@ function get_all_users() {
     return deferred.promise;
 };
 
+function get_all_non_admin_users() {
+    var deferred = q.defer();
+
+    var getUserCallback = function(result) {
+        if (result.error) {
+            deferred.reject(result);
+        } else {
+            deferred.resolve(result);
+        }
+    };
+
+    var getAllUsersQuery = user_query_builder.buildQueryForGetAllNonAdminUsers();
+    basic_db_utility.performMultipleRowDBOperation(getAllUsersQuery, getUserCallback);
+
+    return deferred.promise;
+};
+
 function get_user(user) {
     var deferred = q.defer();
 
@@ -108,5 +125,6 @@ module.exports = {
     get_user: get_user,
     compare_passwords: compare_passwords,
     get_team: get_team,
-    get_all_users: get_all_users
+    get_all_users: get_all_users,
+    get_all_non_admin_users: get_all_non_admin_users
 }

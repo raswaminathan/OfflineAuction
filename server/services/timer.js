@@ -57,6 +57,12 @@ timer.prototype.reset = function() {
     this.emit('reset:timer', this.formatTime(this.time));
 };
 
+timer.prototype.reset = function(valueInSeconds) {
+    console.log('Resetting timer!');
+    this.time = 1000*valueInSeconds;
+    this.emit('reset:timer', this.formatTime(this.time));
+};
+
 timer.prototype.onTick = function() {
     this.time -= this.second;
 
