@@ -1,7 +1,7 @@
 var Globals = {
-    basePath: "/Users/rahulswaminathan/OfflineAuction",
-    clientBasePath: "/Users/rahulswaminathan/OfflineAuction/client",
-    serverBasePath:"/Users/rahulswaminathan/OfflineAuction/server"
+    basePath: "/Users/kommajes/Desktop/OfflineAuction",
+    clientBasePath: "/Users/kommajes/Desktop/OfflineAuction/client",
+    serverBasePath:"/Users/kommajes/Desktop/OfflineAuction/server"
 }
 
 module.exports = Globals;
