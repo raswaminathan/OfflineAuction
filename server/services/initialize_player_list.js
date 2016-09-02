@@ -6,12 +6,12 @@ var player_service = require('./players')
 exports.initialize = function() {
 
   var rl = readline.createInterface({
-    input: fs.createReadStream(globals.serverBasePath + '/player_list_temp.txt'),
+    input: fs.createReadStream(globals.serverBasePath + '/player_list.txt'),
     terminal: false
   });
 
   rl.on('line', function(chunk){
-      
+
       var split = chunk.split(",");
       var player = {
         first_name: split[0],
@@ -29,5 +29,3 @@ exports.initialize = function() {
   });
 
 };
-
-
