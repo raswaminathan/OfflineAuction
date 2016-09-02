@@ -1,0 +1,24 @@
+<div class="panel panel-default" style="width: 40%;" id="login" aria-describedby="sizing-addon3">
+    <div class="panel-body">
+        <h3>TIMER</h3>
+        <h2> Player: {{currentPlayer}} </h2>
+        <h2>Current Bid: {{currentBid}} </h2>
+        <h2>Team: {{currentBidUser()}} </h2>
+
+        <div ng-show="isMyTurn">
+            <select ng-model="chosenPlayer">
+              <option ng-repeat="player in availablePlayers" value="{{player.player_id}}">{{player.first_name}} {{player.last_name}}</option>
+            </select>
+
+            <input type="text" class="form-control" placeholder="StartingBid" ng-model="startingBid">
+
+            <button class="btn btn-primary" ng-click="nominatePlayer()"> Nominate Player </button>
+        </div>
+    </div>
+
+    <div class="panel-body">
+        <input type="text" class="form-control" placeholder="Bid Value" ng-model="myBid">
+        <button class="btn btn-primary" ng-click="placeBid()"> Place bid </button>
+    </div>
+
+</div>

@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('LiarsPoker')
+angular.module('OfflineAuction')
     .controller('MainCtrl', function ($scope, $http, $location, $window, $rootScope, $sce) {
 
         $scope.config = {
@@ -75,14 +75,20 @@ angular.module('LiarsPoker')
             $http.post(signInUrl, $scope.user).then(function(response) {
                 $scope.clearError();
                 populateUserWithLoginResponse(response.data);
-                $scope.goToRoomsPage();
+
+                if ($scope.isAdmin()) {
+                    $scope.goToRegisterPage();
+                } else {
+                    $scope.goToDraftPage();
+                }
+                
             }, function(error) {
                 $scope.addError($scope.invalidLoginAlert);
                 clearFields();
             });
         };
 
-        $scope.register = function() {
+        $scope.goToRegisterPage = function() {
             $location.url('/register');
         }
 
@@ -137,16 +143,20 @@ angular.module('LiarsPoker')
             });
         };
 
-        $scope.goToRulesPage = function() {
-            $location.url('/rules');
+        $scope.isAdmin = function() {
+            return $scope.user.username === 'admin';
+        }
+
+        $scope.goToDraftPage = function() {
+            $location.url('/draft');
+        };
+
+        $scope.goToDraftBoardPage = function() {
+            $location.url('/draft_board');
         };
 
         $scope.goToLoginPage = function() {
             $location.url('/login');
-        };
-
-        $scope.goToRoomsPage = function() {
-            $location.url('/rooms');
         };
 
         $scope.isTabSelected = function(loadedPage) {

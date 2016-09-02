@@ -20,6 +20,8 @@ module.exports.buildQueryForGetAllUsers = function() {
   
     return squel.select()
             .from("user")
+            .field("username")
+            .field("user_id")
             .toString();
 };
 
@@ -27,7 +29,7 @@ module.exports.buildQueryForGetAllNonAdminUsers = function() {
   
     return squel.select()
             .from("user")
-            .where("username != admin")
+            .where("username <> ?" , "admin")
             .toString();
 };
 

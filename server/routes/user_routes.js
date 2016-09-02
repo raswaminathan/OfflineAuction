@@ -6,11 +6,19 @@ router.get('/all', function(req, res, next){
     if (!req.session.user || !('username' in req.session.user)) {
         res.status(401).json({noSession: true});
     } else {
-        user_service.get_all_users().then(function(result) {
+        user_service.get_all_non_admin_users().then(function(result) {
             res.status(200).json(result);
         }, function(error) {
             res.status(403).json(error);
         });
+    }
+});
+
+router.get('/', function(req, res, next){
+    if (!req.session.user || !('username' in req.session.user)) {
+        res.status(401).json({noSession: true});
+    } else {
+        res.status(200).json(req.session.user);
     }
 });
 

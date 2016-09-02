@@ -1,7 +1,7 @@
 'use strict';
 
-angular.module('LiarsPoker')
-    .controller('RoomsCtrl', function ($scope, $http, $q) {
+angular.module('OfflineAuction')
+    .controller('DraftBoardCtrl', function ($scope, $http, $q) {
         $scope.initializePage = function(showRoomModalValue) {
             $scope.roomNameToCreate = '';
 

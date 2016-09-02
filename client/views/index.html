@@ -23,18 +23,13 @@
     <script src="bower_components/moment/min/locales.min.js"></script>
     <script src="bower_components/humanize-duration/humanize-duration.js"></script>
 
-    <script type="text/javascript" src="scripts/directives/angular-timer.js"></script>
-
     <script src="scripts/app.js"></script>
     <script src="scripts/controllers/main_controller.js"></script>
     <script src="scripts/controllers/register.js"></script>
-    <script src="scripts/controllers/rooms.js"></script>
-    <script src="scripts/controllers/room_modal.js"></script>
-    <script src="scripts/services/cards.js"></script>
-
+    <script src="scripts/controllers/draft.js"></script>
+    <script src="scripts/controllers/draft_board.js"></script>
     
     <script type="text/javascript" src="scripts/directives/modalShow.js"></script>
-    <script type="text/javascript" src="scripts/directives/angular-deck.js"></script>
     <script type="text/javascript" src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
     <script type="text/javascript" src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
 
@@ -46,13 +41,14 @@
 
 </head>
 
-<body ng-app="LiarsPoker" ng-controller="MainCtrl">
+<body ng-app="OfflineAuction" ng-controller="MainCtrl">
    <div class="container">
         <div class="header">
             <ul class="nav nav-pills pull-right">
+                <li><button class="btn btn-default btn-sm" ng-show="user.loggedIn && !isAdmin()" ng-click="goToDraftPage()">Draft</button></li>
+                <li><button class="btn btn-default btn-sm" ng-show="user.loggedIn && isAdmin()" ng-click="goToDraftBoardPage()">Draft Board</button></li>
+                <li><button class="btn btn-default btn-sm" ng-show="user.loggedIn && isAdmin()" ng-click="goToRegisterUserPage()">Register User</button></li>
                 <li><button class="btn btn-default btn-sm" ng-show="user.loggedIn" ng-click="logout()">Logout</button><li>
-                <li><button class="btn btn-default btn-sm" ng-click="goToRulesPage()">Rules</button></li>
-                <li><button class="btn btn-default btn-sm" ng-show="user.loggedIn" ng-click="goToRoomsPage()">Rooms</button></li>
             </ul>
         </div>
 

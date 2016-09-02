@@ -9,7 +9,7 @@ var timerOut = false;
 
 var registerTimerEvents = function(timer, req) {
     timer.on('tick:timer', function(time) {
-      req.io.sockets.emit('timer tick ', { time: time });
+      req.io.sockets.emit('timer tick', { time: time });
     });
 
     timer.on('timer:out', function() {
@@ -24,7 +24,7 @@ var registerTimerEvents = function(timer, req) {
 
         if (users[currentHighBidIndex].remaining_roster_spots == 0) {
             users.splice(currentHighBidIndex, 1);
-            req.io.sockets.emit('user done ', {user_id: users[currentHighBidIndex].user_id});
+            req.io.sockets.emit('user done', {user_id: users[currentHighBidIndex].user_id});
         }
         
         currentTurnIndex = findNextTurnIndex(users);
@@ -33,11 +33,11 @@ var registerTimerEvents = function(timer, req) {
     });
 
     timer.on('reset:timer', function(time) {
-        req.io.sockets.emit('timer reset ', {time: time});
+        req.io.sockets.emit('timer reset', {time: time});
     });
 };
 
-// data contains user_id and player_id
+// data contains user_id, player_id, and startingBid
 var registerDraftEvents = function(req) {
     req.io.sockets.on('nominate player', function(data) {
         if (data.user_id == draft.users[currentTurnIndex].user_id) {
@@ -48,13 +48,14 @@ var registerDraftEvents = function(req) {
             draft.currentHighBid = startingBid;
             draft.currentHighBidIndex = findIndexInArray(draft.users, user_id);
             resetAndStartTimer(draft.timer, 10);
-            emitPlayerNominatedEvent(req, draft.currentNominatedPlayer, startingBid);
+            emitPlayerNominatedEvent(req, draft.currentNominatedPlayer, startingBid, user_id);
 
         } else {
             // do nothing for now i guess
         }
     });
 
+// data contains bid, user_id
     req.io.sockets.on('place bid', function(data) {
         if (timerOut) {
             return;
@@ -93,11 +94,11 @@ var stopTimer = function(timer) {
 };
 
 var emitTurnToNominateEvent = function(req, user_id) {
-    req.io.sockets.emit('user turn ', {user_id: user_id});
+    req.io.sockets.emit('user turn', {user_id: user_id});
 };
 
-var emitPlayerNominatedEvent = function(req, player, startingBid) {
-    req.io.sockets.emit('player nominated', {player: player, startingBid: startingBid});
+var emitPlayerNominatedEvent = function(req, player, startingBid, user_id) {
+    req.io.sockets.emit('player nominated', {player: player, startingBid: startingBid, user_id: user_id});
 };
 
 var findNextTurnIndex = function(users) {
@@ -116,6 +117,20 @@ var findIndexInArray = function(users, user_id) {
 
     return user_ids.indexOf(user_id);
 };
+
+router.get('/getAllAvailablePlayers', function(req, res, next){
+    if (!req.session.user || !('username' in req.session.user)) {
+        res.status(401).json({noSession: true});
+    } else {
+        player_service.get_all_available_players().then(function(result) {
+            res.status(200).json(result);
+
+        }, function(error) {
+            console.log(error);
+            res.status(400).json(error);
+        });
+    }
+});
 
 router.post('/start', function(req, res, next){
     if (!req.session.user || !('username' in req.session.user)) {
@@ -153,3 +168,5 @@ router.post('/start', function(req, res, next){
 
     }
 });
+
+module.exports = router;

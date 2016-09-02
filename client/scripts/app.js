@@ -1,12 +1,11 @@
 'use strict';
 
 angular
-  .module('LiarsPoker', ['ngRoute', 'angular-deck', "ngSanitize",
+  .module('OfflineAuction', ['ngRoute', "ngSanitize",
       "com.2fdevs.videogular",
       "com.2fdevs.videogular.plugins.controls",
       "com.2fdevs.videogular.plugins.overlayplay",
-      "com.2fdevs.videogular.plugins.poster",
-      "timer"])
+      "com.2fdevs.videogular.plugins.poster"])
   .config(function ($routeProvider) {
       $routeProvider
             .when('/login', {
@@ -17,12 +16,13 @@ angular
                 templateUrl: '/views/register.html',
                 controller: 'RegisterCtrl'
             })
-            .when('/rules', {
-                templateUrl: '/views/rules.html'
+            .when('/draft', {
+                templateUrl: '/views/draft.html',
+                controller: 'DraftCtrl'
             })
-            .when('/rooms', {
-                templateUrl: '/views/rooms.html',
-                controller: 'RoomsCtrl'
+            .when('/draft_board', {
+                templateUrl: '/views/draft_board.html',
+                controller: 'DraftBoardCtrl'
             })
             .otherwise({
               redirectTo: '/login'

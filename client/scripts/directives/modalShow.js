@@ -3,7 +3,7 @@
 
 // NOTE: This modal code was obtained from http://stackoverflow.com/questions/19644405/simple-angular-directive-for-bootstrap-modal
 
-angular.module('LiarsPoker').directive("modalShow",  ['$parse', function ($parse) {
+angular.module('OfflineAuction').directive("modalShow",  ['$parse', function ($parse) {
     return {
         restrict: "A",
         link: function (scope, element, attrs) {

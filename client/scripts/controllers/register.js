@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('LiarsPoker')
+angular.module('OfflineAuction')
     .controller('RegisterCtrl', function ($scope, $http, $location, $window, $rootScope) {
 
         $scope.clearError();
@@ -9,7 +9,8 @@ angular.module('LiarsPoker')
         var initializeNewUser = function() {
             $scope.newUser = {
                 username: '',
-                password: ''
+                password: '',
+                confirmPassword: ''
             };
         };
 
@@ -30,7 +31,8 @@ angular.module('LiarsPoker')
 
             $http.put('/user', $scope.newUser).then(function(response) {
                 $scope.addSuccess($scope.successfulRegisterMessage);
-                $location.url("/login");
+                initializeNewUser();
+                // $location.url("/login");
             }, function(error) {
                 $scope.addError(registerAlerts.failedRegisterAlert);
             });
