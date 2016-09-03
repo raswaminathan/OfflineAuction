@@ -8,9 +8,39 @@ angular.module('OfflineAuction')
             });
         };
 
+        $scope.pauseDraft = function() {
+            sendPauseDraftRequest().then(function(response) {
+            });
+        };
+
+        $scope.resumeDraft = function() {
+            sendResumeDraftRequest().then(function(response) {
+            });
+        };
+
         function sendStartDraftRequest() {
             var deferred = $q.defer();
             $http.post('/draft/start').then(function(response) {
+                deferred.resolve();
+            }, function(error) {
+                deferred.reject();
+            });
+            return deferred.promise;
+        };
+
+        function sendPauseDraftRequest() {
+            var deferred = $q.defer();
+            $http.post('/draft/pauseDraft').then(function(response) {
+                deferred.resolve();
+            }, function(error) {
+                deferred.reject();
+            });
+            return deferred.promise;
+        };
+
+        function sendResumeDraftRequest() {
+            var deferred = $q.defer();
+            $http.post('/draft/resumeDraft').then(function(response) {
                 deferred.resolve();
             }, function(error) {
                 deferred.reject();

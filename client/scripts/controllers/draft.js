@@ -19,6 +19,7 @@ angular.module('OfflineAuction')
         $scope.selectedPosition = "ALL";
         $scope.positionOptions = ["ALL", "QB", "RB", "WR", "TE", "DST", "K"];
         $scope.playersToSelect = [];
+        $scope.draftPaused = false;
 
         $scope.initializePage = function() {
             $scope.currentBid = 0;
@@ -35,6 +36,7 @@ angular.module('OfflineAuction')
             $scope.done = false;
             $scope.playersToSelect = [];
             $scope.selectedPosition = "ALL";
+            $scope.draftPaused = false;
 
             removeAllListeners();
             addAllListeners();
@@ -43,6 +45,7 @@ angular.module('OfflineAuction')
               var draft = response.data;
 
               $scope.draftStarted = true;
+              $scope.draftPaused = draft.draftPaused;
               $scope.currentBid = draft.currentHighBid < 0 ? 0 : draft.currentHighBid;
               $scope.myBid = $scope.currentBid + 1;
 
@@ -113,6 +116,8 @@ angular.module('OfflineAuction')
             $scope.socket.off('player nominated');
             $scope.socket.off('user turn');
             $scope.socket.off('player drafted');
+            $scope.socket.off('draft paused');
+            $scope.socket.off('draft resumed');
         };
 
         function addAllListeners() {
@@ -123,6 +128,16 @@ angular.module('OfflineAuction')
 
             $scope.socket.on('reset timer', function(time) {
                 $scope.timerValue = 0;
+            });
+
+            $scope.socket.on('draft paused', function() {
+                $scope.draftPaused = true;
+                $scope.$apply();
+            });
+
+            $scope.socket.on('draft resumed', function() {
+                $scope.draftPaused = false;
+                $scope.$apply();
             });
 
             $scope.socket.on('bid placed', function(data) {
@@ -171,7 +186,7 @@ angular.module('OfflineAuction')
         };
 
         $scope.showPlaceBid = function() {
-          return !($scope.done) && !($scope.currentPlayer == null || $scope.currentPlayer == {}) && ($scope.user.user_id != $scope.currentBidUserId);
+          return !($scope.draftPaused) && !($scope.done) && !($scope.currentPlayer == null || $scope.currentPlayer == {}) && ($scope.user.user_id != $scope.currentBidUserId);
         };
 
         $scope.currentBidUser = function() {

@@ -7,6 +7,7 @@ var draft = {};
 var currentTurnIndex= -1;
 var timerOut = false;
 var draftStarted = false;
+var draftPaused = false;
 const TIMER_RESET_TIME = 10;
 const WR_LIMIT = 8;
 const RB_LIMIT = 8;
@@ -282,11 +283,42 @@ router.get('/draftState', function(req, res, next){
             users: draft.users,
             currentTurnUserId: draft.currentTurnUserId,
             currentState: draft.currentState,
-            currentNominatedPlayer: draft.currentNominatedPlayer
+            currentNominatedPlayer: draft.currentNominatedPlayer,
+            draftPaused: draftPaused
           }
           res.status(200).json(toReturn);
         } else {
           res.status(400).json({});
+        }
+    }
+});
+
+router.post('/pauseDraft', function(req, res, next){
+    if (!req.session.user || !('username' in req.session.user)) {
+        res.status(401).json({noSession: true});
+    } else {
+        if (!draftStarted || draftPaused ||!req.session.user.username === 'admin') {
+          res.status(403).json({message: "Not admin / draft not started"});
+        } else {
+          stopTimer(draft.timer);
+          draftPaused = true;
+          req.io.sockets.emit('draft paused', {});
+          res.status(200).json({});
+        }
+    }
+});
+
+router.post('/resumeDraft', function(req, res, next){
+    if (!req.session.user || !('username' in req.session.user)) {
+        res.status(401).json({noSession: true});
+    } else {
+        if (!draftStarted || !draftPaused || !req.session.user.username === 'admin') {
+          res.status(403).json({message: "Not admin / draft not started"});
+        } else {
+          resetAndStartTimer(draft.timer, TIMER_RESET_TIME);
+          draftPaused = false;
+          req.io.sockets.emit('draft resumed', {});
+          res.status(200).json({});
         }
     }
 });
