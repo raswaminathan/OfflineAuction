@@ -22,7 +22,7 @@
             </select>
 
             <select ng-model="startingBid">
-                <option ng-repeat="option in startingBidOptions" value="{{option}}">{{option}}</option>
+                <option ng-repeat="option in startingBidOptions" value="{{option}}">${{option}}</option>
             </select>
 
             <button class="btn btn-primary" ng-click="nominatePlayer()"> Nominate Player </button>
@@ -31,7 +31,7 @@
 
     <div ng-show="showPlaceBid()" class="panel-body">
         <select style="width: 100%" ng-model="myBid">
-            <option ng-repeat="option in placeBidOptions" value="{{option}}">{{option}}</option>
+            <option ng-repeat="option in placeBidOptions" value="{{option}}">${{option}}</option>
         </select> <br> <br> <br>
         <button style="width: 100%; height: 200px; font-size: -webkit-xxx-large" class="btn btn-primary" ng-click="placeBid()"> Place bid </button>
     </div>

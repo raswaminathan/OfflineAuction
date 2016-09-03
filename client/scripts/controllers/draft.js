@@ -34,6 +34,7 @@ angular.module('OfflineAuction')
             $scope.draftStarted = false;
             $scope.done = false;
             $scope.playersToSelect = [];
+            $scope.selectedPosition = "ALL";
 
             removeAllListeners();
             addAllListeners();
@@ -154,7 +155,7 @@ angular.module('OfflineAuction')
                 var price = data.amount;
                 var username = data.username;
                 $scope.initializePage();
-                $scope.addSuccess(playerName + " drafted by " + username + " for " + price);
+                $scope.addSuccess(playerName + " drafted by " + username + " for $" + price);
                 //alert();
             });
 
