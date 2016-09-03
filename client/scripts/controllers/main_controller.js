@@ -152,7 +152,7 @@ angular.module('OfflineAuction')
         };
         
         $scope.goToRulesPage = function() {
-            $location.url('/rules');
+            $location.url('/oooohneck');
         };
 
         $scope.goToDraftBoardPage = function() {

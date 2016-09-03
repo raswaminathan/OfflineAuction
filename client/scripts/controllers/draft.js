@@ -64,7 +64,7 @@ angular.module('OfflineAuction')
                     createStartingBidOptions();
                   }
 
-                  if (draft.currentState == 'bid') {
+                  if (draft.currentState === 'bid') {
                     $scope.currentPlayer = draft.currentNominatedPlayer;
                     createPlaceBidOptions();
                   }
@@ -150,8 +150,12 @@ angular.module('OfflineAuction')
 
             // do more here
             $scope.socket.on('player drafted', function(data) {
+                var playerName = data.player.first_name + " " + data.player.last_name;
+                var price = data.amount;
+                var username = data.username;
                 $scope.initializePage();
-                alert("player drafted");
+                $scope.addSuccess(playerName + " drafted by " + username + " for " + price);
+                //alert();
             });
 
             $scope.socket.on('user turn', function(data) {

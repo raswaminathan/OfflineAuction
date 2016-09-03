@@ -24,7 +24,7 @@ angular
                 templateUrl: '/views/draft_board.html',
                 controller: 'DraftBoardCtrl'
             })
-            .when('/rules', {
+            .when('/oooohneck', {
                 templateUrl: '/views/rules.html'
             })
             .otherwise({

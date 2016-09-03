@@ -18,7 +18,7 @@
         </label>
              </div>
             <select ng-model="chosenPlayer">
-              <option ng-repeat="player in playersToSelect" value="{{player.player_id}}">{{player.first_name}} {{player.last_name}}</option>
+              <option ng-repeat="player in playersToSelect" value="{{player.player_id}}">{{player.first_name}} {{player.last_name}} - ${{player.value}}</option>
             </select>
 
             <select ng-model="startingBid">
@@ -36,6 +36,17 @@
         <button style="width: 100%; height: 200px; font-size: -webkit-xxx-large" class="btn btn-primary" ng-click="placeBid()"> Place bid </button>
     </div>
 
+    <div class="alert alert-danger" ng-show="hasError.value">
+      <strong>Warning:</strong> {{alertMessage.value}}
+      <a class="glyphicon glyphicon-remove" aria-hidden="true" ng-click="clearError()"></a>
+    </div>
+    <div class="alert alert-success" ng-show="hasSuccess.value">
+      <strong>YA DONE FUCKED UP:</strong> {{successMessage.value}}
+      <a class="glyphicon glyphicon-remove" aria-hidden="true" ng-click="clearSuccess()"></a>
+    </div>
+
     <!-- <button class="btn btn-primary" ng-disabled="draftStarted" ng-click="startDraft()"> Start Draft </button> -->
 
 </div>
+
+

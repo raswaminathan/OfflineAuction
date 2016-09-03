@@ -34,7 +34,7 @@ var registerTimerEvents = function(timer, req) {
 
         // remove player from availablePlayers and add to draftedPlayers
 
-        req.io.sockets.emit('player drafted', {player: draft.currentNominatedPlayer, user_id: users[currentHighBidIndex].user_id,
+        req.io.sockets.emit('player drafted', {player: draft.currentNominatedPlayer, username: users[currentHighBidIndex].username,
                                                 amount: draft.currentHighBid});
 
         var playerPosition = draft.currentNominatedPlayer.position;
