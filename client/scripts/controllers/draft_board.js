@@ -18,6 +18,11 @@ angular.module('OfflineAuction')
             });
         };
 
+        $scope.resetRound = function() {
+            sendResetRoundRequest().then(function(response) {
+            });
+        };
+
         function sendStartDraftRequest() {
             var deferred = $q.defer();
             $http.post('/draft/start').then(function(response) {
@@ -41,6 +46,16 @@ angular.module('OfflineAuction')
         function sendResumeDraftRequest() {
             var deferred = $q.defer();
             $http.post('/draft/resumeDraft').then(function(response) {
+                deferred.resolve();
+            }, function(error) {
+                deferred.reject();
+            });
+            return deferred.promise;
+        };
+
+        function sendResetRoundRequest() {
+            var deferred = $q.defer();
+            $http.post('/draft/resetRound').then(function(response) {
                 deferred.resolve();
             }, function(error) {
                 deferred.reject();

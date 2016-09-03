@@ -44,6 +44,8 @@ angular.module('OfflineAuction')
             sendGetStateRequest().then(function(response) {
               var draft = response.data;
 
+              console.log(draft);
+
               $scope.draftStarted = true;
               $scope.draftPaused = draft.draftPaused;
               $scope.currentBid = draft.currentHighBid < 0 ? 0 : draft.currentHighBid;
@@ -118,6 +120,7 @@ angular.module('OfflineAuction')
             $scope.socket.off('player drafted');
             $scope.socket.off('draft paused');
             $scope.socket.off('draft resumed');
+            $scope.socket.off('reset round');
         };
 
         function addAllListeners() {
@@ -138,6 +141,10 @@ angular.module('OfflineAuction')
             $scope.socket.on('draft resumed', function() {
                 $scope.draftPaused = false;
                 $scope.$apply();
+            });
+
+            $scope.socket.on('reset round', function() {
+                $scope.initializePage();
             });
 
             $scope.socket.on('bid placed', function(data) {

@@ -323,6 +323,30 @@ router.post('/resumeDraft', function(req, res, next){
     }
 });
 
+router.post('/resetRound', function(req, res, next){
+    if (!req.session.user || !('username' in req.session.user)) {
+        res.status(401).json({noSession: true});
+    } else {
+        if (!draftStarted  || !req.session.user.username === 'admin') {
+          res.status(403).json({message: "Not admin / draft not started"});
+        } else {
+          if (!draftPaused) {
+            stopTimer(draft.timer);
+          }
+          draft.currentState = 'nomination';
+          draftPaused = false;
+          draft.currentHighBid = -1;
+          draft.currentHighBidIndex = -1;
+          draft.previousHighBid = -1;
+          draft.previousHighBidIndex = -1;
+          draft.currentNominatedPlayer = {};
+          draft.currentNominatedPlayerIndex = -1;
+          req.io.sockets.emit('reset round', {});
+          res.status(200).json({});
+        }
+    }
+});
+
 router.post('/start', function(req, res, next){
     if (!req.session.user || !('username' in req.session.user)) {
         res.status(401).json({noSession: true});
