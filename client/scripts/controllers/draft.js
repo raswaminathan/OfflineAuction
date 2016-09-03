@@ -15,6 +15,10 @@ angular.module('OfflineAuction')
         $scope.startingBid = 1;
         $scope.NEGATIVE_ONE = -1;
         $scope.draftStarted = false;
+        $scope.done = false;
+        $scope.selectedPosition = "ALL";
+        $scope.positionOptions = ["ALL", "QB", "RB", "WR", "TE", "DST", "K"];
+        $scope.playersToSelect = [];
 
         $scope.initializePage = function() {
             $scope.currentBid = 0;
@@ -28,38 +32,76 @@ angular.module('OfflineAuction')
             $scope.chosenPlayer = -1;
             $scope.startingBid = 1;
             $scope.draftStarted = false;
+            $scope.done = false;
+            $scope.playersToSelect = [];
+
             removeAllListeners();
             addAllListeners();
 
-            sendGetStateRequest().then(response => {
+            sendGetStateRequest().then(function(response) {
               var draft = response.data;
 
               $scope.draftStarted = true;
-              $scope.currentBid = draft.currentHighBid;
+              $scope.currentBid = draft.currentHighBid < 0 ? 0 : draft.currentHighBid;
               $scope.myBid = $scope.currentBid + 1;
 
               $scope.currentBidUserId = draft.currentHighBidUserId;
               $scope.availablePlayers = draft.availablePlayers;
+              $scope.playersToSelect = $scope.availablePlayers;
               $scope.allUsers = draft.users;
-              if (draft.currentTurnUserId === $scope.user.user_id && draft.currentState == 'nomination') {
-                $scope.isMyTurn = true;
-              }
-
-              if (draft.currentState == 'bid') {
-                $scope.currentPlayer = draft.currentNominatedPlayer;
-              }
 
               var index = findUserIndex($scope.user.user_id);
-              $scope.user.cash_remaining = $scope.allUsers[index].cash_remaining;
-              $scope.user.remaining_roster_spots = $scope.allUsers[index].remaining_roster_spots;
-              $scope.user.maxBid = $scope.user.cash_remaining - $scope.user.remaining_roster_spots + 1;
 
-            }, error => {
+              if (index === -1) {
+                $scope.done = true;
+              } else {
+                  $scope.user.cash_remaining = $scope.allUsers[index].cash_remaining;
+                  $scope.user.remaining_roster_spots = $scope.allUsers[index].remaining_roster_spots;
+                  $scope.user.maxBid = $scope.user.cash_remaining - $scope.user.remaining_roster_spots + 1;
+
+                  if (draft.currentTurnUserId === $scope.user.user_id && draft.currentState == 'nomination') {
+                    $scope.isMyTurn = true;
+                    createStartingBidOptions();
+                  }
+
+                  if (draft.currentState == 'bid') {
+                    $scope.currentPlayer = draft.currentNominatedPlayer;
+                    createPlaceBidOptions();
+                  }
+            }
+
+            },  function(error) {
               getAllUsers();
               getAllAvailablePlayers();
-              $scope.user.cash_remaining = 207;
+              //$scope.user.cash_remaining = 207;
             });
+        };
 
+        $scope.filterByPosition = function(selectedPosition) {
+            $scope.playersToSelect = [];
+            if (selectedPosition === "ALL") {
+                $scope.playersToSelect = $scope.availablePlayers;
+            } else {
+                for (var i = 0; i<$scope.availablePlayers.length; i++) {
+                    if ($scope.availablePlayers[i].position === selectedPosition) {
+                        $scope.playersToSelect.push($scope.availablePlayers[i]);
+                    }
+                }
+            }
+        };
+
+        function createStartingBidOptions() {
+            $scope.startingBidOptions = [];
+            for (var i = 1; i<$scope.user.maxBid + 1; i++) {
+                $scope.startingBidOptions.push(i);
+            }
+        };
+
+        function createPlaceBidOptions() {
+            $scope.placeBidOptions = [];
+            for (var i = $scope.currentBid + 1; i<$scope.user.maxBid + 1; i++) {
+                $scope.placeBidOptions.push(i);
+            }
         };
 
 
@@ -73,36 +115,46 @@ angular.module('OfflineAuction')
         };
 
         function addAllListeners() {
-            $scope.socket.on('timer tick', time => {
+            $scope.socket.on('timer tick', function(time) {
                 $scope.timerValue = time.time;
                 $scope.$apply();
             });
 
-            $scope.socket.on('reset timer', time => {
+            $scope.socket.on('reset timer', function(time) {
                 $scope.timerValue = 0;
             });
 
-            $scope.socket.on('bid placed', data => {
+            $scope.socket.on('bid placed', function(data) {
                 $scope.currentBid = data.currentHighBid;
                 $scope.currentBidUserId = data.user_id;
-                $scope.myBid = $scope.currentHighBid + 1;
-            });
-
-            $scope.socket.on('player nominated', data => {
-                console.log(data);
-                $scope.currentPlayer = data.player;
-                $scope.currentBid = data.startingBid;
-                $scope.currentBidUserId = data.user_id;
+                $scope.myBid = $scope.currentBid + 1;
+                createPlaceBidOptions();
                 $scope.$apply();
             });
 
+            $scope.socket.on('player nominated', function(data) {
+                $scope.currentPlayer = data.player;
+                $scope.currentBid = data.startingBid;
+                $scope.currentBidUserId = data.user_id;
+                $scope.myBid = $scope.currentBid + 1;
+                createPlaceBidOptions();
+                $scope.$apply();
+            });
+
+            $scope.socket.on('user done', function(data) {
+                if (data.user_id === $scope.user.user_id) {
+                    $scope.done = true;
+                    $scope.$apply();
+                }
+            });
+
             // do more here
-            $scope.socket.on('player drafted', data => {
+            $scope.socket.on('player drafted', function(data) {
                 $scope.initializePage();
                 alert("player drafted");
             });
 
-            $scope.socket.on('user turn', data => {
+            $scope.socket.on('user turn', function(data) {
                 if (data.user_id == $scope.user.user_id) {
                     $scope.isMyTurn = true;
                     getAllAvailablePlayers().then(function() {
@@ -114,7 +166,7 @@ angular.module('OfflineAuction')
         };
 
         $scope.showPlaceBid = function() {
-          return !($scope.currentPlayer == null || $scope.currentPlayer == {});
+          return !($scope.done) && !($scope.currentPlayer == null || $scope.currentPlayer == {}) && ($scope.user.user_id != $scope.currentBidUserId);
         };
 
         $scope.currentBidUser = function() {
@@ -133,7 +185,7 @@ angular.module('OfflineAuction')
 
         $scope.placeBid = function() {
 
-            sendPlaceBidRequest().then(response => {
+            sendPlaceBidRequest().then(function(response) {
               console.log("Bid placed");
             });
         };
@@ -143,7 +195,7 @@ angular.module('OfflineAuction')
             if ($scope.chosenPlayer < 0 || $scope.startingBid < 1) {
                 return;
             } else {
-                sendNominatePlayerRequest().then(response => {
+                sendNominatePlayerRequest().then(function(response){
                   console.log("Player nominated");
                   $scope.isMyTurn = false;
                 });
@@ -219,8 +271,6 @@ angular.module('OfflineAuction')
             var deferred = $q.defer();
             $http.get('/draft/getAllAvailablePlayers').then(function(response) {
                 $scope.availablePlayers = response.data.results;
-                console.log($scope.availablePlayers);
-
                 deferred.resolve();
             }, function(error) {
                 deferred.reject();

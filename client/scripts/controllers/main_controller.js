@@ -150,6 +150,10 @@ angular.module('OfflineAuction')
         $scope.goToDraftPage = function() {
             $location.url('/draft');
         };
+        
+        $scope.goToRulesPage = function() {
+            $location.url('/rules');
+        };
 
         $scope.goToDraftBoardPage = function() {
             $location.url('/draft_board');

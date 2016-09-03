@@ -3,7 +3,7 @@
 angular.module('OfflineAuction')
     .controller('DraftBoardCtrl', function ($scope, $http, $q) {
         $scope.startDraft = function() {
-            sendStartDraftRequest().then(response => {
+            sendStartDraftRequest().then(function(response) {
               $scope.draftStarted = true;
             });
         };

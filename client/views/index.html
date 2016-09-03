@@ -46,8 +46,9 @@
         <div class="header">
             <ul class="nav nav-pills pull-right">
                 <li><button class="btn btn-default btn-sm" ng-show="user.loggedIn && !isAdmin()" ng-click="goToDraftPage()">Draft</button></li>
-                <li><button class="btn btn-default btn-sm" ng-show="user.loggedIn && isAdmin()" ng-click="goToDraftBoardPage()">Draft Board</button></li>
+                <li><button class="btn btn-default btn-sm" ng-show="user.loggedIn && isAdmin()" ng-click="goToDraftBoardPage()">Start Draft</button></li>
                 <li><button class="btn btn-default btn-sm" ng-show="user.loggedIn && isAdmin()" ng-click="goToRegisterUserPage()">Register User</button></li>
+                <li><button class="btn btn-default btn-sm" ng-click="goToRulesPage()">OOOOH NECK</button></li>
                 <li><button class="btn btn-default btn-sm" ng-show="user.loggedIn" ng-click="logout()">Logout</button><li>
             </ul>
         </div>

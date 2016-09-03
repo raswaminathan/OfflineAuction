@@ -6,6 +6,7 @@ module.exports.buildQueryForAddPlayer = function(player) {
             .set("last_name", player.last_name)
             .set("position", player.position)
             .set("team", player.team)
+            .set("value", player.value)
             .toString();
 };
 
@@ -13,6 +14,7 @@ module.exports.buildQueryForGetAllAvailablePlayers = function(player) {
     return squel.select()
             .from("player")
             .where("available = 1")
+            .order("value", false)
             .toString()
 };
 

@@ -7,6 +7,13 @@ var draft = {};
 var currentTurnIndex= -1;
 var timerOut = false;
 var draftStarted = false;
+const TIMER_RESET_TIME = 10;
+const WR_LIMIT = 8;
+const RB_LIMIT = 8;
+const QB_LIMIT = 4;
+const DST_LIMIT = 3;
+const K_LIMIT = 3;
+const TE_LIMIT = 3;
 
 var registerTimerEvents = function(timer, req) {
     timer.on('tick:timer', function(time) {
@@ -25,17 +32,38 @@ var registerTimerEvents = function(timer, req) {
 
         // write to DB here ?
 
-        if (users[currentHighBidIndex].remaining_roster_spots == 0) {
-            users.splice(currentHighBidIndex, 1);
-            req.io.sockets.emit('user done', {user_id: users[currentHighBidIndex].user_id});
-        }
-
         // remove player from availablePlayers and add to draftedPlayers
 
         req.io.sockets.emit('player drafted', {player: draft.currentNominatedPlayer, user_id: users[currentHighBidIndex].user_id,
                                                 amount: draft.currentHighBid});
+
+        var playerPosition = draft.currentNominatedPlayer.position;
+
+        if (playerPosition === "WR") {
+            users[currentHighBidIndex].wr++;
+        } else if (playerPosition === "RB") {
+            users[currentHighBidIndex].rb++;
+        } else if (playerPosition === "QB") {
+            users[currentHighBidIndex].qb++;
+        } else if (playerPosition === "TE") {
+            users[currentHighBidIndex].te++;
+        } else if (playerPosition === "DST") {
+            users[currentHighBidIndex].dst++;
+        } else if (playerPosition === "K") {
+            users[currentHighBidIndex].k++;
+        }
+
+        if (users[currentHighBidIndex].remaining_roster_spots === 0) {
+            req.io.sockets.emit('user done', {user_id: users[currentHighBidIndex].user_id});
+            users.splice(currentHighBidIndex, 1);
+        }
+
         draft.draftedPlayers.push(draft.currentNominatedPlayer);
         draft.availablePlayers.splice(draft.currentNominatedPlayerIndex, 1);
+
+        if (users.length === 0) {
+          return;
+        }
 
         draft.currentNominatedPlayer = {};
         draft.currentHighBidIndex = -1;
@@ -44,7 +72,12 @@ var registerTimerEvents = function(timer, req) {
         draft.currentHighBidUserId = -1;
         draft.currentHighBid = -1;
 
+        console.log(users);
+
         draft.currentTurnIndex = findNextTurnIndex(users);
+
+        console.log(draft.currentTurnIndex);
+
         draft.currentTurnUserId = draft.users[draft.currentTurnIndex].user_id;
         draft.currentState = 'nomination';
         emitTurnToNominateEvent(req, draft.users[draft.currentTurnIndex].user_id);
@@ -75,11 +108,34 @@ router.post('/nominatePlayer', function(req, res, next){
               return;
           }
           draft.currentNominatedPlayer = draft.availablePlayers[findPlayerIndexInArray(draft.availablePlayers, player_id)];
+
+          var playerPosition = draft.currentNominatedPlayer.position;
+
+          if (playerPosition === "WR" && user.wr===WR_LIMIT) {
+              res.status(400).json({message: "REACHED PLAYER LIMIT"});
+              return;
+          } else if (playerPosition === "RB" && user.rb === RB_LIMIT) {
+              res.status(400).json({message: "REACHED PLAYER LIMIT"});
+              return;
+          } else if (playerPosition === "QB" && user.qb === QB_LIMIT) {
+              res.status(400).json({message: "REACHED PLAYER LIMIT"});
+              return;
+          } else if (playerPosition === "TE" && user.te === TE_LIMIT) {
+              res.status(400).json({message: "REACHED PLAYER LIMIT"});
+              return;
+          } else if (playerPosition === "DST" && user.dst === DST_LIMIT) {
+              res.status(400).json({message: "REACHED PLAYER LIMIT"});
+              return;
+          } else if (playerPosition === "K" && user.k === K_LIMIT) {
+              res.status(400).json({message: "REACHED PLAYER LIMIT"});
+              return;
+          }
+
           draft.currentNominatedPlayerIndex = findPlayerIndexInArray(draft.availablePlayers, player_id);
           draft.currentHighBid = startingBid;
           draft.currentHighBidIndex = findIndexInArray(draft.users, user_id);
           draft.currentHighBidUserId = user_id;
-          resetAndStartTimer(draft.timer, 10);
+          resetAndStartTimer(draft.timer, TIMER_RESET_TIME);
           emitPlayerNominatedEvent(req, draft.currentNominatedPlayer, startingBid, user_id);
           draft.currentState = 'bid';
           res.status(200).json({});
@@ -102,7 +158,6 @@ router.post('/placeBid', function(req, res, next){
             return;
         }
 
-
         if (bid <= draft.currentHighBid) {
             console.log(bid);
             console.log(draft.currentHighBid);
@@ -111,6 +166,27 @@ router.post('/placeBid', function(req, res, next){
         }
 
         var user = draft.users[findIndexInArray(draft.users, user_id)];
+
+        var playerPosition = draft.currentNominatedPlayer.position; 
+        if (playerPosition === "WR" && user.wr===WR_LIMIT) {
+            res.status(400).json({message: "REACHED PLAYER LIMIT"});
+            return;
+        } else if (playerPosition === "RB" && user.rb === RB_LIMIT) {
+            res.status(400).json({message: "REACHED PLAYER LIMIT"});
+            return;
+        } else if (playerPosition === "QB" && user.qb === QB_LIMIT) {
+            res.status(400).json({message: "REACHED PLAYER LIMIT"});
+            return;
+        } else if (playerPosition === "TE" && user.te === TE_LIMIT) {
+            res.status(400).json({message: "REACHED PLAYER LIMIT"});
+            return;
+        } else if (playerPosition === "DST" && user.dst === DST_LIMIT) {
+            res.status(400).json({message: "REACHED PLAYER LIMIT"});
+            return;
+        } else if (playerPosition === "K" && user.k === K_LIMIT) {
+            res.status(400).json({message: "REACHED PLAYER LIMIT"});
+            return;
+        }
 
         var cashLeft = user.cash_remaining - bid;
 
@@ -125,7 +201,7 @@ router.post('/placeBid', function(req, res, next){
             draft.currentHighBidIndex = findIndexInArray(draft.users, user_id);
             draft.currentHighBidUserId = user_id;
             req.io.sockets.emit('bid placed', {currentHighBid: draft.currentHighBid, user_id: user_id});
-            resetAndStartTimer(draft.timer, 10);
+            resetAndStartTimer(draft.timer, TIMER_RESET_TIME);
             res.status(200).json({});
         }
     }
@@ -227,7 +303,18 @@ router.post('/start', function(req, res, next){
         user_service.get_all_non_admin_users().then(function(result) {
             draft.users = result.results;
 
+            for (var i = 0; i<draft.users.length; i++) {
+                var user = draft.users[i];
+                user.wr = 0;
+                user.rb = 0;
+                user.te = 0;
+                user.dst = 0;
+                user.qb = 0;
+                user.k = 0;
+            }
+
             player_service.get_all_available_players().then(function(result) {
+
                 draft.availablePlayers = result.results;
                 draft.draftedPlayers = [];
                 draft.currentHighBid = -1;

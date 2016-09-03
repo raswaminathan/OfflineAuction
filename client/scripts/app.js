@@ -24,6 +24,9 @@ angular
                 templateUrl: '/views/draft_board.html',
                 controller: 'DraftBoardCtrl'
             })
+            .when('/rules', {
+                templateUrl: '/views/rules.html'
+            })
             .otherwise({
               redirectTo: '/login'
            });
