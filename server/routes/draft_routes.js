@@ -8,7 +8,7 @@ var currentTurnIndex= -1;
 var timerOut = false;
 var draftStarted = false;
 var draftPaused = false;
-const TIMER_RESET_TIME = 10;
+const TIMER_RESET_TIME = 20;
 const WR_LIMIT = 8;
 const RB_LIMIT = 8;
 const QB_LIMIT = 4;
@@ -209,7 +209,13 @@ router.post('/placeBid', function(req, res, next){
 });
 
 var resetAndStartTimer = function(timer, startValue) {
-    timer.reset(startValue);
+  console.log(timer.time);
+    if (timer.time / 1000 > 10) {
+      timer.reset(TIMER_RESET_TIME);
+    } else {
+      timer.reset(10);
+    }
+    //timer.reset(startValue);
     timer.start();
     timerOut = false;
 };
