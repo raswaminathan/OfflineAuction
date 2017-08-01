@@ -20,11 +20,8 @@ var redis_store = require('connect-redis')(session);
 var client = redis.createClient();
 
 var views = require('./routes/views');
-// // var tag_routes = require('./routes/tags');
 var user_routes = require('./routes/user_routes');
 var draft_routes = require('./routes/draft_routes');
-// var room_routes = require('./routes/room_routes');
-// var game_routes = require('./routes/game_routes');
 var image_routes = require('./routes/images');
 var video_routes = require('./routes/videos');
 var script_routes = require('./routes/scripts');
@@ -34,14 +31,6 @@ var bower_routes = require('./routes/bower')
 var initialize_tables = require('./services/initialize_tables');
 var initialize_player_list = require('./services/initialize_player_list');
 var create_admin = require('./services/create_admin');
-
-// var timer = require('./services/timer');
-
-// var t = new timer();
-
-// t.start();
-
-// var shibboleth = require('./routes/shibboleth');
 
 io.on('connection', function(socket){
   console.log('a user connected');

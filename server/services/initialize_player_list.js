@@ -6,7 +6,7 @@ var player_service = require('./players')
 exports.initialize = function() {
 
   var rl = readline.createInterface({
-    input: fs.createReadStream(globals.serverBasePath + '/player_list.txt'),
+    input: fs.createReadStream(globals.serverBasePath + '/conf/player_list.txt'),
     terminal: false
   });
 
