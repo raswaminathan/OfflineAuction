@@ -25,7 +25,7 @@ angular
                 controller: 'DraftBoardCtrl'
             })
             .when('/oooohneck', {
-                templateUrl: '/views/rules.html'
+                templateUrl: '/views/ooohneck.html'
             })
             .otherwise({
               redirectTo: '/login'
