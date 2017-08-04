@@ -5,10 +5,6 @@ var http = require('http').Server(app);
 var io = require('socket.io')(http);
 
 var fs = require('fs');
-//var https = require('https');
-//var privateKey = fs.readFileSync('/opt/bitnami/apache2/conf/server.key', 'utf8');
-//var certificate = fs.readFileSync('/opt/bitnami/apache2/conf/server.crt', 'utf8');
-//var credentials = {key: privateKey, cert: certificate};
 
 // var auth_middleware = require('./middleware/permission_middleware');
 app.engine('html', require('ejs').renderFile);
@@ -61,10 +57,8 @@ app.use(session({
 
 app.use('/', views);
 //app.use('/views', views);
-// // app.use('/tag', tag_routes);
+
 app.use('/user', user_routes);
-// app.use('/room', room_routes);
-// app.use('/game', game_routes);
 app.use('/draft', draft_routes);
 app.use('/images', image_routes);
 app.use('/videos', video_routes);
@@ -72,8 +66,6 @@ app.use('/bower_components', bower_routes);
 app.use('/scripts', script_routes);
 app.use('/node_modules', node_modules_routes);
 app.use('/styles', style_routes);
-// app.use('/', shibboleth);
-
 
 var createAdminCallback = function() {
   initialize_player_list.initialize();
@@ -88,11 +80,6 @@ initialize_tables.initializeDB(initializeDBCallback);
 http.listen(5000, function () {
   console.log('auction app listening on port 5000!');
 });
-
-//var liars_test = require('./test/liars_test');
-//liars_test.runTest();
-
-//https.createServer(credentials, app).listen(443);
 
 // leaves the server up when exception occurs
 
