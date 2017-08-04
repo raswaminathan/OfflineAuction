@@ -1,10 +1,9 @@
-
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 ### WIPE AND RECREATE MYSQL DATABASE
 
 echo "Dropping and recreating db test_auction..."
-mysql -e "drop database test_auction"
-mysql -e "create database test_auction"
+mysql -u root -e "drop database test_auction"
+mysql -u root -e "create database test_auction"
 
 ### CHECK IF REDIS IS RUNNING
 
