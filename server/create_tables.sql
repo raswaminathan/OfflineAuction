@@ -1,5 +1,9 @@
 USE test_auction;
-CREATE TABLE IF NOT EXISTS user (user_id INT NOT NULL AUTO_INCREMENT, remaining_roster_spots INT, username varchar(255) NOT NULL UNIQUE, cash_remaining INT, password varchar(255) NOT NULL, PRIMARY KEY (user_id));
-CREATE TABLE IF NOT EXISTS player (player_id INT NOT NULL AUTO_INCREMENT, first_name varchar(255) NOT NULL, last_name varchar(255) NOT NULL, position ENUM('QB', 'WR', 'RB', 'TE', 'K', 'DST'), value INT, available BOOLEAN DEFAULT 1, team varchar(255) NOT NULL, PRIMARY KEY (player_id));
-CREATE TABLE IF NOT EXISTS user_player (user_id INT, player_id INT, cost INT NOT NULL, PRIMARY KEY (player_id, user_id), FOREIGN KEY (player_id) REFERENCES player(player_id)ON DELETE CASCADE,FOREIGN KEY (user_id) REFERENCES user(user_id) ON DELETE CASCADE);
-DELETE FROM player;
+CREATE TABLE IF NOT EXISTS USER (id INT NOT NULL AUTO_INCREMENT, username varchar(255) NOT NULL UNIQUE, password varchar(255) NOT NULL, PRIMARY KEY (id));
+CREATE TABLE IF NOT EXISTS LEAGUE (id INT NOT NULL AUTO_INCREMENT, name varchar(255) NOT NULL UNIQUE, num_teams INT NOT NULL, num_positions INT NOT NULL, salary_cap INT NOT NULL, draft_type ENUM('AUCTION', 'SNAKE'), PRIMARY KEY (id));
+CREATE TABLE IF NOT EXISTS SPORT (id INT NOT NULL AUTO_INCREMENT, name varchar(255) NOT NULL UNIQUE, PRIMARY KEY (id));
+CREATE TABLE IF NOT EXISTS PLAYER_POSITION (id INT NOT NULL AUTO_INCREMENT, name varchar(255) NOT NULL UNIQUE, sport_id INT, PRIMARY KEY (id, sport_id), FOREIGN KEY (sport_id) REFERENCES SPORT(id));
+CREATE TABLE IF NOT EXISTS TEAM (id INT NOT NULL AUTO_INCREMENT, name varchar(255) NOT NULL UNIQUE, user_id INT, league_id INT, money_remaining INT, PRIMARY KEY (id, user_id, league_id), FOREIGN KEY (league_id) REFERENCES LEAGUE(id) ON DELETE CASCADE, FOREIGN KEY (user_id) REFERENCES USER(id) ON DELETE CASCADE);
+CREATE TABLE IF NOT EXISTS PLAYER (id INT NOT NULL AUTO_INCREMENT, first_name varchar(255) NOT NULL, last_name varchar(255) NOT NULL, position_id INT, team varchar(255) NOT NULL, PRIMARY KEY (id), FOREIGN KEY (position_id) REFERENCES PLAYER_POSITION(id) ON DELETE CASCADE);
+CREATE TABLE IF NOT EXISTS PLAYER_LEAGUE (player_id INT, league_id INT, default_value INT, PRIMARY KEY (player_id, league_id), FOREIGN KEY (player_id) REFERENCES PLAYER(id), FOREIGN KEY (league_id) REFERENCES LEAGUE(id));
+CREATE TABLE IF NOT EXISTS ROSTER (team_id INT, player_id INT, cost INT NOT NULL, draft_position INT, PRIMARY KEY (team_id, player_id), FOREIGN KEY (team_id) REFERENCES TEAM(id) ON DELETE CASCADE, FOREIGN KEY (player_id) REFERENCES PLAYER(id) ON DELETE CASCADE);
