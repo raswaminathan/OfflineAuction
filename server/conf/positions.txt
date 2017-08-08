@@ -1,0 +1,6 @@
+Football,QB
+Football,RB
+Football,WR
+Football,TE
+Football,K
+Football,DST
