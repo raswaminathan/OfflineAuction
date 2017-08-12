@@ -18,6 +18,7 @@ var client = redis.createClient();
 var views = require('./routes/views');
 var user_routes = require('./routes/user_routes');
 var league_routes = require('./routes/league_routes');
+var team_routes = require('./routes/team_routes');
 var draft_routes = require('./routes/draft_routes');
 var image_routes = require('./routes/images');
 var video_routes = require('./routes/videos');
@@ -60,6 +61,7 @@ app.use('/', views);
 
 app.use('/user', user_routes);
 app.use('/league', league_routes);
+app.use('/team', team_routes);
 app.use('/draft', draft_routes);
 app.use('/images', image_routes);
 app.use('/videos', video_routes);
