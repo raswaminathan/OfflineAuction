@@ -1,130 +1,172 @@
-var db_sql = require('./db_wrapper');
-var squel = require('squel');
-var bcrypt = require('bcrypt');
-var q = require('q');
-var user_query_builder = require('./query_builders/user_query_builder');
-var basic_db_utility = require('./basic_db_utility');
-
-function create_user(user){
-    //Creates user given all parameters
-    var deferred = q.defer();
-    var createUserCallback = function(result) {
-        if (result.error) {
-            deferred.reject(result);
-        } else {
-            deferred.resolve(result);
-        }
-    };
-
-    bcrypt.genSalt(10, function(err, salt) {
-        bcrypt.hash(user.password, salt, function(err, hash) {
-            // Store hash in your password DB.
-            var createUserQuery = user_query_builder.buildQueryForCreateUser(user, hash);
-            basic_db_utility.performSingleRowDBOperation(createUserQuery, createUserCallback);
-        });
-    });
-
-    return deferred.promise;
-};
-
-function get_all_users() {
-    var deferred = q.defer();
-
-    var getUserCallback = function(result) {
-        if (result.error) {
-            deferred.reject(result);
-        } else {
-            deferred.resolve(result);
-        }
-    };
-
-    var getAllUsersQuery = user_query_builder.buildQueryForGetAllUsers();
-    basic_db_utility.performMultipleRowDBOperation(getAllUsersQuery, getUserCallback);
-
-    return deferred.promise;
-};
-
-function get_all_non_admin_users() {
-    var deferred = q.defer();
-
-    var getUserCallback = function(result) {
-        if (result.error) {
-            deferred.reject(result);
-        } else {
-            deferred.resolve(result);
-        }
-    };
-
-    var getAllUsersQuery = user_query_builder.buildQueryForGetAllNonAdminUsers();
-    basic_db_utility.performMultipleRowDBOperation(getAllUsersQuery, getUserCallback);
-
-    return deferred.promise;
-};
+const bcrypt = require('bcrypt');
+const q = require('q');
+const user_query_builder = require('./query_builders/user_query_builder');
+const basic_db_utility = require('./basic_db_utility');
 
 function get_user(user) {
-    var deferred = q.defer();
+  const deferred = q.defer();
 
-    var getUserCallback = function(result) {
-        if (result.error) {
-            deferred.reject(result);
-        } else {
-            deferred.resolve(result);
-        }
-    };
-
-    var getUserQuery = user_query_builder.buildQueryForGetUser(user);
-    basic_db_utility.performSingleRowDBOperation(getUserQuery, getUserCallback);
-
-    return deferred.promise;
-};
-
-function get_team(user) {
-    var deferred = q.defer();
-
-    var getUserCallback = function(result) {
-        if (result.error) {
-            deferred.reject(result);
-        } else {
-            deferred.resolve(result);
-        }
-    };
-
-    var getTeamQuery = user_query_builder.buildQueryForGetTeam(user);
-    basic_db_utility.performMultipleRowDBOperation(getTeamQuery, getUserCallback);
-
-    return deferred.promise;
-};
-
-function delete_user(username, callback) {
-
-    var deferred = q
-    if (username == null) {
-        callback({error: true});
-        return;
+  function callback(result) {
+    if (result.error) {
+      deferred.reject(result);
+    } else {
+      deferred.resolve(result);
     }
+  };
 
-    var deleteUserQuery = user_query_builder.buildQueryForDeleteUser(username);
-    basic_db_utility.performSingleRowDBOperation(deleteUserQuery, callback);
+  const query = user_query_builder.buildQueryForGetUser(user);
+  basic_db_utility.performSingleRowDBOperation(query, callback);
+
+  return deferred.promise;
+};
+
+function create_user(user){
+  const deferred = q.defer();
+
+  function callback(result) {
+    if (result.error) {
+      deferred.reject(result);
+    } else {
+      deferred.resolve(result);
+    }
+  };
+
+  bcrypt.genSalt(10, function(err, salt) {
+    bcrypt.hash(user.password, salt, function(err, hash) {
+      const query = user_query_builder.buildQueryForCreateUser(user, hash);
+      basic_db_utility.performSingleRowDBOperation(query, callback);
+    });
+  });
+
+  return deferred.promise;
+};
+
+function update_user(user){
+  const deferred = q.defer();
+
+  const username = user.username;
+  const newUsername = user.newUsername;
+  const password = user.password;
+
+  function callback(result) {
+    if (result.error) {
+      deferred.reject(result);
+    } else {
+      deferred.resolve(result);
+    }
+  };
+
+  if (username == null || username == "") {
+    callback({error: true});
+    return deferred.promise;
+  }
+  if (newUsername == null || newUsername == "") {
+    user.newUsername = username;
+  }
+  if (password != null && password != '') {
+    bcrypt.genSalt(10, function(err, salt) {
+      bcrypt.hash(user.password, salt, function(err, hash) {
+        const query = user_query_builder.buildQueryForUpdateUserWithPassword(user, hash);
+        basic_db_utility.performSingleRowDBOperation(query, callback);
+      });
+    });
+  } else {
+    const query = user_query_builder.buildQueryForUpdateUserWithoutPassword(user);
+    basic_db_utility.performSingleRowDBOperation(query, callback);
+  }
+
+  return deferred.promise;
+};
+
+function delete_user(user) { // Deleting user by username
+  const deferred = q.defer();
+
+  function callback(result) {
+    if (result.error) {
+      deferred.reject(result);
+    } else {
+      deferred.resolve(result);
+    }
+  };
+
+  const query = user_query_builder.buildQueryForDeleteUser(user);
+  basic_db_utility.performSingleRowDBOperation(query, callback);
+
+  return deferred.promise;
+};
+
+function get_league_ids(user) {
+  const deferred = q.defer();
+
+  function callback(result) {
+    if (result.error) {
+      deferred.reject(result);
+    } else {
+      deferred.resolve(result);
+    }
+  };
+
+  const query = user_query_builder.buildQueryForGetLeagueIds(user);
+  basic_db_utility.performMultipleRowDBOperation(query, callback);
+
+  return deferred.promise;
 };
 
 function compare_passwords(password, user, callback) {
+  const deferred = q.defer();
 
-    var deferred = q.defer();
-    bcrypt.compare(password, user.password, function(err, res) {
-        deferred.resolve(res);
-    });
+  bcrypt.compare(password, user.password, function(err, res) {
+    deferred.resolve(res);
+  });
 
-    return deferred.promise;
+  return deferred.promise;
 };
 
+function get_all_users() {
+  const deferred = q.defer();
 
+  function callback(result) {
+    if (result.error) {
+      deferred.reject(result);
+    } else {
+      deferred.resolve(result);
+    }
+  };
+
+  const query = user_query_builder.buildQueryForGetAllUsers();
+  basic_db_utility.performMultipleRowDBOperation(query, callback);
+
+  return deferred.promise;
+};
+
+////////////////////////////////
+// UNUSED FOR NOW
+////////////////////////////////
+
+function get_all_non_admin_users() {
+  const deferred = q.defer();
+
+  function callback(result) {
+    if (result.error) {
+      deferred.reject(result);
+    } else {
+      deferred.resolve(result);
+    }
+  };
+
+  const query = user_query_builder.buildQueryForGetAllNonAdminUsers();
+  basic_db_utility.performMultipleRowDBOperation(query, callback);
+
+  return deferred.promise;
+};
 
 module.exports = {
-    create_user: create_user,
-    delete_user: delete_user,
-    get_user: get_user,
-    compare_passwords: compare_passwords,
-    get_team: get_team,
-    get_all_users: get_all_users,
-    get_all_non_admin_users: get_all_non_admin_users
+  get_user: get_user,
+  create_user: create_user,
+  delete_user: delete_user,
+  update_user: update_user,
+  compare_passwords: compare_passwords,
+  get_league_ids: get_league_ids,
+  get_all_users: get_all_users,
+  get_all_non_admin_users: get_all_non_admin_users
 }
