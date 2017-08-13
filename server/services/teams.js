@@ -27,9 +27,30 @@ function del(id) {
   return deferred.promise;
 };
 
+function add_player(info) {
+  const deferred = q.defer();
+  db.performSingleRowDBOperation(qb.add_player(info), globals.deferredResultCurry(deferred));
+  return deferred.promise;
+}
+
+function remove_player(info) {
+  const deferred = q.defer();
+  db.performSingleRowDBOperation(qb.remove_player(info), globals.deferredResultCurry(deferred));
+  return deferred.promise;
+}
+
+function get_players(team_id) {
+  const deferred = q.defer();
+  db.performMultipleRowDBOperation(qb.get_players(team_id), globals.deferredResultCurry(deferred));
+  return deferred.promise;
+}
+
 module.exports = {
   create: create,
   update: update,
   del: del,
-  get: get
+  get: get,
+  add_player: add_player,
+  remove_player: remove_player,
+  get_players: get_players
 }

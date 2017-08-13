@@ -59,4 +59,45 @@ router.delete('/', function(req, res, next){
   }
 });
 
+// ROSTER OPERATIONS -- should these require a session?!
+
+router.post('/addPlayer', function(req, res, next){
+  if (!req.session.user || !('username' in req.session.user)) {
+    res.status(401).json({noSession: true});
+  } else {
+    team_service.add_player(req.body).then(function(result) {
+      res.status(200).json(result);
+    }, function(error) {
+      res.status(403).json(error);
+    });
+  }
+});
+
+router.post('/removePlayer', function(req, res, next){
+  if (!req.session.user || !('username' in req.session.user)) {
+    res.status(401).json({noSession: true});
+  } else {
+    team_service.remove_player(req.body).then(function(result) {
+      res.status(200).json(result);
+    }, function(error) {
+      res.status(403).json(error);
+    });
+  }
+});
+
+router.get('/players', function(req, res, next){
+  if (!req.session.user || !('username' in req.session.user)) {
+    res.status(401).json({noSession: true});
+  } else if (!('team_id' in req.query)) {
+    res.status(401).json({err: 'no team_id provided for get players'});
+  } else {
+    team_service.get_players(req.query.team_id).then(function(result) {
+      res.status(200).json(result);
+    }, function(error) {
+      res.status(403).json(error);
+    });
+  }
+});
+
+
 module.exports = router;
