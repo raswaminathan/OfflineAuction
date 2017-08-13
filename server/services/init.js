@@ -58,7 +58,7 @@ function init_positions() {
           name: position_names[i],
           sport_id: results[i].results.id 
         };
-        promises2.push(position_service.add_position(position));
+        promises2.push(position_service.create(position));
       }
       return q.all(promises2);
     });
@@ -87,7 +87,7 @@ function init_players() {
           team: split[3],
           position_id: results[i].results.id
         };
-        promises2.push(player_service.add_player(player));
+        promises2.push(player_service.create(player));
       }
       return q.all(promises2);
     });
