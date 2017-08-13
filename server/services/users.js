@@ -1,9 +1,9 @@
 const bcrypt = require('bcrypt');
 const q = require('q');
-const user_query_builder = require('./query_builders/user_query_builder');
-const basic_db_utility = require('./basic_db_utility');
+const qb = require('./query_builders/users_qb');
+const db = require('./basic_db_utility');
 
-function get_user(user) {
+function get(user) {
   const deferred = q.defer();
 
   function callback(result) {
@@ -14,13 +14,12 @@ function get_user(user) {
     }
   };
 
-  const query = user_query_builder.buildQueryForGetUser(user);
-  basic_db_utility.performSingleRowDBOperation(query, callback);
+  db.performSingleRowDBOperation(qb.get(user), callback);
 
   return deferred.promise;
 };
 
-function create_user(user){
+function create(user){
   const deferred = q.defer();
 
   function callback(result) {
@@ -33,15 +32,14 @@ function create_user(user){
 
   bcrypt.genSalt(10, function(err, salt) {
     bcrypt.hash(user.password, salt, function(err, hash) {
-      const query = user_query_builder.buildQueryForCreateUser(user, hash);
-      basic_db_utility.performSingleRowDBOperation(query, callback);
+      db.performSingleRowDBOperation(qb.create(user, hash), callback);
     });
   });
 
   return deferred.promise;
 };
 
-function update_user(user){
+function update(user){
   const deferred = q.defer();
 
   const username = user.username;
@@ -66,19 +64,17 @@ function update_user(user){
   if (password != null && password != '') {
     bcrypt.genSalt(10, function(err, salt) {
       bcrypt.hash(user.password, salt, function(err, hash) {
-        const query = user_query_builder.buildQueryForUpdateUserWithPassword(user, hash);
-        basic_db_utility.performSingleRowDBOperation(query, callback);
+        db.performSingleRowDBOperation(qb.updateWithPassword(user, hash), callback);
       });
     });
   } else {
-    const query = user_query_builder.buildQueryForUpdateUserWithoutPassword(user);
-    basic_db_utility.performSingleRowDBOperation(query, callback);
+    db.performSingleRowDBOperation(qb.updateWithoutPassword(user), callback);
   }
 
   return deferred.promise;
 };
 
-function delete_user(user) { // Deleting user by username
+function del(user) { // Deleting user by username
   const deferred = q.defer();
 
   function callback(result) {
@@ -89,8 +85,7 @@ function delete_user(user) { // Deleting user by username
     }
   };
 
-  const query = user_query_builder.buildQueryForDeleteUser(user);
-  basic_db_utility.performSingleRowDBOperation(query, callback);
+  db.performSingleRowDBOperation(qb.del(user), callback);
 
   return deferred.promise;
 };
@@ -106,8 +101,7 @@ function get_league_ids(user) {
     }
   };
 
-  const query = user_query_builder.buildQueryForGetLeagueIds(user);
-  basic_db_utility.performMultipleRowDBOperation(query, callback);
+  db.performMultipleRowDBOperation(qb.getLeagueIds(user), callback);
 
   return deferred.promise;
 };
@@ -122,7 +116,7 @@ function compare_passwords(password, user, callback) {
   return deferred.promise;
 };
 
-function get_all_users() {
+function get_all() {
   const deferred = q.defer();
 
   function callback(result) {
@@ -133,8 +127,7 @@ function get_all_users() {
     }
   };
 
-  const query = user_query_builder.buildQueryForGetAllUsers();
-  basic_db_utility.performMultipleRowDBOperation(query, callback);
+  db.performMultipleRowDBOperation(qb.getAll(), callback);
 
   return deferred.promise;
 };
@@ -154,19 +147,18 @@ function get_all_non_admin_users() {
     }
   };
 
-  const query = user_query_builder.buildQueryForGetAllNonAdminUsers();
-  basic_db_utility.performMultipleRowDBOperation(query, callback);
+  db.performMultipleRowDBOperation(qb.getAllNonAdmin(), callback);
 
   return deferred.promise;
 };
 
 module.exports = {
-  get_user: get_user,
-  create_user: create_user,
-  delete_user: delete_user,
-  update_user: update_user,
+  get: get,
+  create: create,
+  del: del,
+  update: update,
   compare_passwords: compare_passwords,
   get_league_ids: get_league_ids,
-  get_all_users: get_all_users,
+  get_all: get_all,
   get_all_non_admin_users: get_all_non_admin_users
 }

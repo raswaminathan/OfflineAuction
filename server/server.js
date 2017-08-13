@@ -1,37 +1,31 @@
-var body_parser = require('body-parser');
-var express = require('express');
-var app = express();
-var http = require('http').Server(app);
-var io = require('socket.io')(http);
+const body_parser = require('body-parser');
+const express = require('express');
+const app = express();
+const http = require('http').Server(app);
+const io = require('socket.io')(http);
 
-var fs = require('fs');
-
-// var auth_middleware = require('./middleware/permission_middleware');
+// const auth_middleware = require('./middleware/permission_middleware');
 app.engine('html', require('ejs').renderFile);
-var body_parser = require('body-parser');
-var cookie_parser = require('cookie-parser');
-var session = require('express-session');
-var redis = require('redis');
-var redis_store = require('connect-redis')(session);
-var client = redis.createClient();
+const cookie_parser = require('cookie-parser');
+const session = require('express-session');
+const redis = require('redis');
+const redis_store = require('connect-redis')(session);
+const client = redis.createClient();
 
-var views = require('./routes/views');
-var user_routes = require('./routes/user_routes');
-var league_routes = require('./routes/league_routes');
-var team_routes = require('./routes/team_routes');
-var draft_routes = require('./routes/draft_routes');
-var image_routes = require('./routes/images');
-var video_routes = require('./routes/videos');
-var script_routes = require('./routes/scripts');
-var node_modules_routes = require('./routes/node_modules');
-var style_routes = require('./routes/styles');
-var bower_routes = require('./routes/bower')
-var initialize_tables = require('./services/initialize_tables');
-var create_admin = require('./services/create_admin');
+const views = require('./routes/views');
+const user_routes = require('./routes/user_routes');
+const league_routes = require('./routes/league_routes');
+const team_routes = require('./routes/team_routes');
+const draft_routes = require('./routes/draft_routes');
+const image_routes = require('./routes/images');
+const video_routes = require('./routes/videos');
+const script_routes = require('./routes/scripts');
+const node_modules_routes = require('./routes/node_modules');
+const style_routes = require('./routes/styles');
+const bower_routes = require('./routes/bower')
 
 io.on('connection', function(socket){
   console.log('a user connected');
-
 });
 
 // Make io accessible to our router
@@ -41,15 +35,13 @@ app.use(function(req,res,next){
 });
 
 app.use(body_parser.json());
-// Added for Duke Shibboleth POST
-app.use(body_parser.urlencoded({ extended: true }));
 app.use(cookie_parser());
 
 app.use(session({
-    secret: 'ssshhhhh',
-    store: new redis_store({ host: 'localhost', port: 6379, client: client,ttl :  2600}),
-    saveUninitialized: false,
-    resave: false,
+  secret: 'ssshhhhh',
+  store: new redis_store({ host: 'localhost', port: 6379, client: client,ttl :  2600}),
+  saveUninitialized: false,
+  resave: false,
   key: 'sid'
 }));
 
@@ -70,24 +62,14 @@ app.use('/scripts', script_routes);
 app.use('/node_modules', node_modules_routes);
 app.use('/styles', style_routes);
 
-var init = require('./services/init');
-
-var createAdminCallback = function() {
-  init.go();
-};
-
-var initializeDBCallback = function() {
-  create_admin.createAdmin(createAdminCallback);
-};
-
-initialize_tables.initializeDB(initializeDBCallback);
+const init = require('./services/init');
+init.go();
 
 http.listen(5000, function () {
   console.log('auction app listening on port 5000!');
 });
 
 // leaves the server up when exception occurs
-
 process.on('uncaughtException', function (err) {
-    console.log(err);
+  console.log(err);
 });

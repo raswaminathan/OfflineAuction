@@ -1,9 +1,9 @@
-var path = require('path');
+const path = require('path');
 
-var Globals = {
-    basePath: path.resolve(__dirname + "/.."),
-    clientBasePath: path.resolve(__dirname + "/../client/"),
-    serverBasePath: path.resolve(__dirname)
+const Globals = {
+  basePath: path.resolve(__dirname + "/.."),
+  clientBasePath: path.resolve(__dirname + "/../client/"),
+  serverBasePath: path.resolve(__dirname)
 }
 
 module.exports = Globals;

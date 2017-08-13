@@ -6,14 +6,14 @@ const USERNAME = 'username';
 const PASSWORD = 'password';
 const ADMIN_UN = 'admin';
 
-module.exports.buildQueryForGetUser = function(user) {
+function get(user) {
   return squel.select()
             .from(USER_TABLE)
             .where("username = ?", user.username)
             .toString();
 };
 
-module.exports.buildQueryForCreateUser = function(user, hash) {
+function create(user, hash) {
   return squel.insert()
             .into(USER_TABLE)
             .set(USERNAME, user.username)
@@ -21,14 +21,14 @@ module.exports.buildQueryForCreateUser = function(user, hash) {
             .toString();
 };
 
-module.exports.buildQueryForDeleteUser = function(user) {
+function del(user) {
   return squel.delete()
             .from(USER_TABLE)
             .where("username = ?", user.username)
             .toString();
 };
 
-module.exports.buildQueryForUpdateUserWithPassword = function(user, hash) {
+function updateWithPassword(user, hash) {
   return squel.update()
             .table(USER_TABLE)
             .where("username = ?", user.username)
@@ -37,7 +37,7 @@ module.exports.buildQueryForUpdateUserWithPassword = function(user, hash) {
             .toString();
 };
 
-module.exports.buildQueryForUpdateUserWithoutPassword = function(user) {
+function updateWithoutPassword(user) {
   return squel.update()
             .table(USER_TABLE)
             .where("username = ?", user.username)
@@ -46,7 +46,7 @@ module.exports.buildQueryForUpdateUserWithoutPassword = function(user) {
             .toString();
 };
 
-module.exports.buildQueryForGetLeagueIds = function(user) {
+function getLeagueIds(user) {
   return squel.select()
             .from(USER_TABLE)
             .field("league.id")
@@ -56,7 +56,7 @@ module.exports.buildQueryForGetLeagueIds = function(user) {
             .toString();
 };
 
-module.exports.buildQueryForGetAllUsers = function() {
+function getAll() {
   return squel.select()
             .from(USER_TABLE)
             .field(USERNAME)
@@ -64,9 +64,20 @@ module.exports.buildQueryForGetAllUsers = function() {
             .toString();
 };
 
-module.exports.buildQueryForGetAllNonAdminUsers = function() {
+function getAllNonAdminUsers() {
   return squel.select()
             .from(USER_TABLE)
             .where("username <> ?" , ADMIN_UN)
             .toString();
 };
+
+module.exports = {
+  create: create,
+  updateWithPassword: updateWithPassword,
+  updateWithoutPassword: updateWithoutPassword,
+  del: del,
+  get: get,
+  getAll: getAll,
+  getAllNonAdminUsers: getAllNonAdminUsers,
+  getLeagueIds: getLeagueIds
+}
