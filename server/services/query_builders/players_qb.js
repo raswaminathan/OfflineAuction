@@ -6,6 +6,7 @@ function create(player) {
           .set("last_name", player.last_name)
           .set("position_id", player.position_id)
           .set("team", player.team)
+          .set("default_value", player.default_value)
           .toString();
 };
 

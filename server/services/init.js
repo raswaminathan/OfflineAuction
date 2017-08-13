@@ -85,6 +85,7 @@ function init_players() {
           first_name: split[0],
           last_name: split[1],
           team: split[3],
+          default_value: split[4],
           position_id: results[i].results.id
         };
         promises2.push(player_service.create(player));

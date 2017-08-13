@@ -37,6 +37,37 @@ res = t.get(id)
 c.check(res.status_code == 200)
 c.check(json.loads(res.content)['results']['name'] == 'REX')
 
+c.desc = '#### add player to team'
+res = t.add_player(id, 1, 20, 1)
+c.check(res.status_code == 200)
+
+c.desc = '#### player exists on team'
+res = t.get_players(id)
+c.check(res.status_code == 200)
+c.check(len(json.loads(res.content)['results']) == 1)
+c.check(json.loads(res.content)['results'][0]['cost'] == 20)
+
+c.desc = '#### add another player to team'
+res = t.add_player(id, 2, 30, 2)
+c.check(res.status_code == 200)
+
+c.desc = '#### both players now exist on team'
+res = t.get_players(id)
+c.check(res.status_code == 200)
+c.check(len(json.loads(res.content)['results']) == 2)
+c.check(json.loads(res.content)['results'][0]['cost'] == 20)
+c.check(json.loads(res.content)['results'][1]['cost'] == 30)
+
+c.desc = '#### remove first player from team'
+res = t.remove_player(id, 1)
+c.check(res.status_code == 200)
+
+c.desc = '#### only second player exists on team'
+res = t.get_players(id)
+c.check(res.status_code == 200)
+c.check(len(json.loads(res.content)['results']) == 1)
+c.check(json.loads(res.content)['results'][0]['cost'] == 30)
+
 c.desc = '#### delete team'
 res = t.delete(id)
 c.check(res.status_code == 200)
