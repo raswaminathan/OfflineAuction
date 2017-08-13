@@ -1,45 +1,42 @@
-var db_sql = require('./db_wrapper');
-var squel = require('squel');
-var bcrypt = require('bcrypt');
-var q = require('q');
-var player_query_builder = require('./query_builders/player_query_builder');
-var basic_db_utility = require('./basic_db_utility');
+const q = require('q');
+const qb = require('./query_builders/players_qb');
+const db = require('./basic_db_utility');
 
 function add_player(player) {
-    var deferred = q.defer();
+  const deferred = q.defer();
 
-    var addPlayerCallback = function(result) {
-        if (result.error) {
-            deferred.reject(result);
-        } else {
-            deferred.resolve(result);
-        }
-    };
+  function callback(result) {
+    if (result.error) {
+        deferred.reject(result);
+    } else {
+        deferred.resolve(result);
+    }
+  };
 
-    var addPlayerQuery = player_query_builder.buildQueryForAddPlayer(player);
-    basic_db_utility.performSingleRowDBOperation(addPlayerQuery, addPlayerCallback);
+  const query = qb.buildQueryForAddPlayer(player);
+  db.performSingleRowDBOperation(query, callback);
 
-    return deferred.promise;
+  return deferred.promise;
 };
 
 function get_all_available_players() {
-    var deferred = q.defer();
+  const deferred = q.defer();
 
-    var getPlayersCallback = function(result) {
-        if (result.error) {
-            deferred.reject(result);
-        } else {
-            deferred.resolve(result);
-        }
-    };
+  function callback(result) {
+    if (result.error) {
+        deferred.reject(result);
+    } else {
+        deferred.resolve(result);
+    }
+  };
 
-    var getAllPlayersQuery = player_query_builder.buildQueryForGetAllAvailablePlayers();
-    basic_db_utility.performMultipleRowDBOperation(getAllPlayersQuery, getPlayersCallback);
+  const query = qb.buildQueryForGetAllAvailablePlayers();
+  db.performMultipleRowDBOperation(query, callback);
 
-    return deferred.promise;
+  return deferred.promise;
 };
 
 module.exports = {
-    add_player: add_player,
-    get_all_available_players: get_all_available_players
+  add_player: add_player,
+  get_all_available_players: get_all_available_players
 }
