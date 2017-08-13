@@ -1,60 +1,28 @@
 const q = require('q');
 const qb = require('./query_builders/positions_qb');
 const db = require('./basic_db_utility');
+const globals = require('../globals');
 
-function add_position(position) {
+function create(position) {
   const deferred = q.defer();
-
-  function callback(result) {
-    if (result.error) {
-      deferred.reject(result);
-    } else {
-      deferred.resolve(result);
-    }
-  };
-
-  const query = qb.buildQueryForAddPosition(position);
-  db.performSingleRowDBOperation(query, callback);
-
+  db.performSingleRowDBOperation(qb.create(position), globals.deferredResultCurry(deferred));
   return deferred.promise;
 };
 
 function get_all_positions() {
   const deferred = q.defer();
-
-  function callback(result) {
-    if (result.error) {
-      deferred.reject(result);
-    } else {
-      deferred.resolve(result);
-    }
-  };
-
-  const query = qb.buildQueryForGetAllPositions();
-  db.performMultipleRowDBOperation(query, callback);
-
+  db.performMultipleRowDBOperation(qb.get_all(), globals.deferredResultCurry(deferred));
   return deferred.promise;
 };
 
 function get_position_by_name(name) {
   const deferred = q.defer();
-
-  function callback(result) {
-    if (result.error) {
-      deferred.reject(result);
-    } else {
-      deferred.resolve(result);
-    }
-  };
-
-  const query = qb.buildQueryForGetPositionByName(name);
-  db.performSingleRowDBOperation(query, callback);
-
+  db.performSingleRowDBOperation(qb.get_by_name(name), globals.deferredResultCurry(deferred));
   return deferred.promise;
 };
 
 module.exports = {
-  add_position: add_position,
+  create: create,
   get_all_positions: get_all_positions,
   get_position_by_name: get_position_by_name
 }
