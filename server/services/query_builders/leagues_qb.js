@@ -73,6 +73,13 @@ function get_available_players(league_id) {
             .toString();
 };
 
+function reset_to_position(info) {
+  return squel.delete()
+            .from('roster')
+            .where('team_id in ? AND draft_position > ?', squel.select().field('id', 'team_id').from('team').where('team.league_id = ?', info.league_id), info.draft_position)
+            .toString();
+}
+
 module.exports = {
   create: create,
   update: update,
@@ -80,5 +87,6 @@ module.exports = {
   get: get,
   getAll: getAll,
   get_teams: get_teams,
-  get_available_players: get_available_players
+  get_available_players: get_available_players,
+  reset_to_position: reset_to_position
 }

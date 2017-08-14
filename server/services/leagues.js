@@ -45,6 +45,12 @@ function get_available_players(league_id) {
   return deferred.promise;
 };
 
+function reset_to_position(info) {
+  const deferred = q.defer();
+  db.performMultipleRowDBOperation(qb.reset_to_position(info), globals.deferredResultCurry(deferred));
+  return deferred.promise;
+};
+
 module.exports = {
   create: create,
   update: update,
@@ -52,5 +58,6 @@ module.exports = {
   get: get,
   getAll: getAll,
   get_teams: get_teams,
-  get_available_players: get_available_players
+  get_available_players: get_available_players,
+  reset_to_position: reset_to_position
 }

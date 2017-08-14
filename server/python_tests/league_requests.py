@@ -45,3 +45,10 @@ def get_teams(league_id):
 
 def get_available_players(league_id):
   return r.send_request('/league/availablePlayers', 'GET', {'league_id': league_id})
+
+def reset_to_position(league_id, draft_position):
+  params = {
+    'league_id': league_id,
+    'draft_position': draft_position
+  }
+  return r.send_request('/league/resetToPosition', 'POST', params)

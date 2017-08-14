@@ -99,5 +99,16 @@ router.get('/availablePlayers', function(req, res, next){
   }
 });
 
+router.post('/resetToPosition', function(req, res, next){
+  if (!req.session.user || !('username' in req.session.user)) {
+    res.status(401).json({noSession: true});
+  } else {
+    league_service.reset_to_position(req.body).then(function(result) {
+      res.status(200).json(result);
+    }, function(error) {
+      res.status(403).json(error);
+    });
+  }
+});
 
 module.exports = router;
