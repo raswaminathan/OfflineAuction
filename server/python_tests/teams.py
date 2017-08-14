@@ -87,6 +87,18 @@ res = l.get_available_players(league_id)
 c.check(res.status_code == 200)
 c.check(total_num_players - 2 == len(json.loads(res.content)['results']))
 
+## add 2 more players to team
+res = t.add_player(id, 3, 30, 3)
+res = t.add_player(id, 4, 30, 4)
+res = l.get_available_players(league_id)
+c.check(total_num_players - 4 == len(json.loads(res.content)['results']))
+
+c.desc = 'reset draft to draft_position 2'
+res = l.reset_to_position(league_id, 2)
+c.check(res.status_code == 200)
+res = l.get_available_players(league_id)
+c.check(total_num_players - 2 == len(json.loads(res.content)['results']))
+
 c.desc = '#### remove first player from team'
 res = t.remove_player(id, 1)
 c.check(res.status_code == 200)
