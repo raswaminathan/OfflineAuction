@@ -71,4 +71,33 @@ router.delete('/', function(req, res, next){
   }
 });
 
+router.get('/teams', function(req, res, next){
+  if (!req.session.user || !('username' in req.session.user)) {
+    res.status(401).json({noSession: true});
+  } else if (!('league_id' in req.query)) {
+    res.status(401).json({err: 'no league_id provided for get teams'});
+  } else {
+    league_service.get_teams(req.query.league_id).then(function(result) {
+      res.status(200).json(result);
+    }, function(error) {
+      res.status(403).json(error);
+    });
+  }
+});
+
+router.get('/availablePlayers', function(req, res, next){
+  if (!req.session.user || !('username' in req.session.user)) {
+    res.status(401).json({noSession: true});
+  } else if (!('league_id' in req.query)) {
+    res.status(401).json({err: 'no league_id provided for get teams'});
+  } else {
+    league_service.get_available_players(req.query.league_id).then(function(result) {
+      res.status(200).json(result);
+    }, function(error) {
+      res.status(403).json(error);
+    });
+  }
+});
+
+
 module.exports = router;
