@@ -33,10 +33,24 @@ function getAll() {
   return deferred.promise;
 };
 
+function get_teams(league_id) {
+  const deferred = q.defer();
+  db.performMultipleRowDBOperation(qb.get_teams(league_id), globals.deferredResultCurry(deferred));
+  return deferred.promise;
+};
+
+function get_available_players(league_id) {
+  const deferred = q.defer();
+  db.performMultipleRowDBOperation(qb.get_available_players(league_id), globals.deferredResultCurry(deferred));
+  return deferred.promise;
+};
+
 module.exports = {
   create: create,
   update: update,
   del: del,
   get: get,
-  getAll: getAll
+  getAll: getAll,
+  get_teams: get_teams,
+  get_available_players: get_available_players
 }

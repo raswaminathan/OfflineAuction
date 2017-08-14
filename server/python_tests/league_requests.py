@@ -38,4 +38,10 @@ def get(id):
   return r.send_request('/league', 'GET', {'id': id})
 
 def getAll():
-  return r.send_request('/league/all', 'GET', {})  
+  return r.send_request('/league/all', 'GET', {})
+
+def get_teams(league_id):
+  return r.send_request('/league/teams', 'GET', {'league_id': league_id})
+
+def get_available_players(league_id):
+  return r.send_request('/league/availablePlayers', 'GET', {'league_id': league_id})

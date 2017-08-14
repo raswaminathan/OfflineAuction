@@ -34,7 +34,7 @@ c.desc = '#### delete league'
 res = l.delete(id)
 c.check(res.status_code == 200)
 
-c.desc = '#### league no longer exist'
+c.desc = '#### league no longer exists'
 res = l.get(id)
 c.check(res.status_code == 200)
 c.check(len(json.loads(res.content)['results']) == 0)
