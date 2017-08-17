@@ -51,6 +51,12 @@ function reset_to_position(info) {
   return deferred.promise;
 };
 
+function start_draft(league_id) {
+  const deferred = q.defer();
+  db.performSingleRowDBOperation(qb.start_draft(league_id), globals.deferredResultCurry(deferred));
+  return deferred.promise;
+};
+
 module.exports = {
   create: create,
   update: update,
@@ -59,5 +65,6 @@ module.exports = {
   getAll: getAll,
   get_teams: get_teams,
   get_available_players: get_available_players,
-  reset_to_position: reset_to_position
+  reset_to_position: reset_to_position,
+  start_draft: start_draft
 }

@@ -80,6 +80,14 @@ function reset_to_position(info) {
             .toString();
 }
 
+function start_draft(league_id) {
+  return squel.update()
+            .table('league')
+            .where('id = ?', league_id)
+            .set('draft_started', true)
+            .toString();
+}
+
 module.exports = {
   create: create,
   update: update,
@@ -88,5 +96,6 @@ module.exports = {
   getAll: getAll,
   get_teams: get_teams,
   get_available_players: get_available_players,
-  reset_to_position: reset_to_position
+  reset_to_position: reset_to_position,
+  start_draft: start_draft
 }
