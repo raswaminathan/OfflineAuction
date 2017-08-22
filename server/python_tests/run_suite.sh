@@ -19,3 +19,4 @@ function run_test {
 run_test users-test.log users.py
 run_test leagues-test.log leagues.py
 run_test teams-test.log teams.py
+run_test drafts-test.log drafts.py

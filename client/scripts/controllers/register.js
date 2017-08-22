@@ -1,64 +1,99 @@
 'use strict';
 
 angular.module('OfflineAuction')
-    .controller('RegisterCtrl', function ($scope, $http, $location, $window, $rootScope) {
+  .controller('RegisterCtrl', function ($scope, $http, $location, $window, $rootScope, $q) {
 
-        $scope.clearError();
-        $scope.clearSuccess();
+    $scope.clearError();
+    $scope.clearSuccess();
 
-        var initializeNewUser = function() {
-            $scope.newUser = {
-                username: '',
-                password: '',
-                confirmPassword: ''
-            };
-        };
+    $scope.availableLeagues = [];
+    $scope.newUser = {};
+    $scope.team_name = ''
+    $scope.chosenLeague = -1;
 
-        initializeNewUser();
+    init();
 
-        var registerAlerts = {  usernameAlert: 'Please enter a username.',
-                                passwordMatchAlert: 'Passwords do not match.',
-                                failedRegisterAlert: 'Username already exists, enter a new one!'
-                            };
+    function initializeNewUser() {
+      $scope.newUser = {
+        username: '',
+        password: '',
+        confirmPassword: ''
+      };
+    };
 
+    function init() {
+      initializeNewUser();
+      populateAvailableLeagues();
+      $scope.chosenLeague = '';
+    }
 
-        $scope.successfulRegisterMessage = 'User created successfully.';
+    $scope.goToLoginPage = function() {
+      $location.url('/login');
+    }
 
-        $scope.register = function() {
-            if (!validate()) {
-                return;
-            }
+    $scope.register = function() {
+      if (!validate()) {
+        return;
+      }
 
-            $http.put('/user', $scope.newUser).then(function(response) {
-                $scope.addSuccess($scope.successfulRegisterMessage);
-                initializeNewUser();
-                // $location.url("/login");
-            }, function(error) {
-                $scope.addError(registerAlerts.failedRegisterAlert);
-            });
+      $http.put('/user', $scope.newUser).then(function(response) {
+        const user_id = response.data.results.insertId;
+        addTeam(user_id).then(function(response){
+          $scope.addSuccess('User and Team created successfully');
+          init();
+        }, function(error) {
+          $scope.addError('Fucked, league creation failed');
+        });
+      }, function(error) {
+        $scope.addError('Username already exists, enter a new one!');
+      });
+     };
 
-         };
+    function validate() {
+      if ($scope.newUser.username.length == 0) {
+        $scope.addError('Please enter a username.');
+        return false;
+      }
+      if ($scope.newUser.password != $scope.newUser.confirmPassword) {
+        $scope.addError('Passwords do not match.');
+        return false;
+      }
+      if ($scope.team_name == '') {
+        $scope.addError('Team name must not be empty');
+        return false;
+      }
+      if ($scope.chosenLeague == '') {
+        $scope.addError('Must choose a league');
+        return false;
+      }
+      return true;
+    };
 
-         var validate = function() {
-            var validFields = validateNonEmptyField($scope.newUser.username, registerAlerts.usernameAlert);
-                             
-            validFields = validFields && validatePassword();
-            return validFields;
-         };
+    function addTeam(user_id) {
+      const deferred = $q.defer();
+      const body = {
+        name: $scope.team_name,
+        user_id: user_id,
+        league_id: $scope.chosenLeague,
+        money_remaining: 207 // HACK SHOULD REMOVE IN FUTURE
+      }
+      $http.put('/team', body).then(function(response) {
+        deferred.resolve();
+      }, function(error) {
+        deferred.reject();
+      });
+      return deferred.promise;
+    };
 
-         var validateNonEmptyField = function(field, errorMessage) {
-            if (field.length == 0) {
-                $scope.addError(errorMessage);
-                return false;
-            }
-            return true;
-         };
-
-         var validatePassword = function() {
-            if ($scope.newUser.password != $scope.newUser.confirmPassword) {
-                $scope.addError(registerAlerts.passwordMatchAlert);
-                return false;
-            }
-            return true;
-         };
+    function populateAvailableLeagues() {
+      const deferred = $q.defer();
+      $http.get('/league/all').then(function(response) {
+          $scope.availableLeagues = response.data.results;
+          console.log($scope.availableLeagues);
+          deferred.resolve();
+      }, function(error) {
+          deferred.reject();
+      });
+      return deferred.promise;
+    };
 });

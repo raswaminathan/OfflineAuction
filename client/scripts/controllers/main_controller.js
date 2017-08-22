@@ -74,10 +74,11 @@ angular.module('OfflineAuction')
             console.log($scope.user);
             $http.post(signInUrl, $scope.user).then(function(response) {
                 $scope.clearError();
+                console.log(response.data);
                 populateUserWithLoginResponse(response.data);
 
                 if ($scope.isAdmin()) {
-                    $scope.goToRegisterPage();
+                    $scope.goToDraftBoardPage();
                 } else {
                     $scope.goToDraftPage();
                 }
@@ -89,12 +90,12 @@ angular.module('OfflineAuction')
         };
 
         $scope.goToRegisterPage = function() {
-            $location.url('/register');
+          $location.url('/register');
         }
 
         var populateUserWithLoginResponse = function(data) {
             $scope.user.username = data.username;
-            $scope.user.user_id = data.user_id;
+            $scope.user.user_id = data.id;
             $scope.user.loggedIn = true;
         };
 
@@ -144,19 +145,23 @@ angular.module('OfflineAuction')
         };
 
         $scope.isAdmin = function() {
-            return $scope.user.username === 'admin';
+          return $scope.user.username === 'admin';
         }
 
         $scope.goToDraftPage = function() {
-            $location.url('/draft');
+          $location.url('/draft');
         };
         
         $scope.goToRulesPage = function() {
-            $location.url('/oooohneck');
+          $location.url('/oooohneck');
         };
 
         $scope.goToDraftBoardPage = function() {
-            $location.url('/draft_board');
+          $location.url('/draft_board');
+        };
+
+        $scope.goToCreateLeaguePage = function() {
+          $location.url('/create_league');
         };
 
         $scope.goToLoginPage = function() {

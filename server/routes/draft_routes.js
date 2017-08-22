@@ -25,7 +25,6 @@ router.post('/start', function(req, res, next){
         league_service.get_available_players(league_id).then(function(result){
           let draft = drafts[league_id];
           draft.availablePlayers = result.results;
-          draft.draftedPlayers = [];
           draft.currentHighBid = -1;
           draft.currentHighBidIndex = -1;
           draft.previousHighBid = -1;
@@ -35,7 +34,7 @@ router.post('/start', function(req, res, next){
           draft.timer = new Timer();
           draft.timerOut = false;
           draft.currentTurnIndex = 0;
-          draft.currentTurnTeamId = draft.teams[draft.currentTurnIndex].team_id;
+          draft.currentBidTeamId = draft.teams[draft.currentTurnIndex].team_id;
           draft.currentState = 'nomination';
 
           /// HACK
@@ -85,7 +84,7 @@ router.post('/nominatePlayer', function(req, res, next){
       draft.currentNominatedPlayerIndex = findPlayerIndexInArray(draft.availablePlayers, player_id);
       draft.currentHighBid = startingBid;
       draft.currentHighBidIndex = findTeamIndexInArray(draft.teams, team_id);
-      draft.currentTurnTeamId = team_id;
+      draft.currentBidTeamId = team_id;
       emitPlayerNominatedEvent(req, league_id, draft.currentNominatedPlayer, startingBid, team_id);
       resetAndStartTimer(draft.timer, TIMER_RESET_TIME);
       draft.currentState = 'bid';
@@ -100,7 +99,7 @@ router.post('/nominatePlayer', function(req, res, next){
 // req.body contains bid
 router.post('/placeBid', function(req, res, next){
   if (!req.session.user || !('username' in req.session.user)) {
-      res.status(401).json({noSession: true});
+    res.status(401).json({noSession: true});
   } else if (!('league_id') in req.body) {
     res.status(400).json({message: 'must provide league_id when starting draft'});
   } else {
@@ -128,7 +127,7 @@ router.post('/placeBid', function(req, res, next){
         draft.previousHighBidIndex = draft.currentHighBidIndex;
         draft.currentHighBid = bid;
         draft.currentHighBidIndex = findTeamIndexInArray(draft.teams, team_id);
-        draft.currentTurnTeamId = team_id;
+        draft.currentBidTeamId = team_id;
         req.io.sockets.emit('bid placed:' + league_id, {currentHighBid: draft.currentHighBid, team_id: team_id});
         resetAndStartTimer(draft.timer, TIMER_RESET_TIME);
         res.status(200).json({});
@@ -140,7 +139,7 @@ router.post('/placeBid', function(req, res, next){
 router.get('/state', function(req, res, next){
   if (!req.session.user || !('username' in req.session.user)) {
     res.status(401).json({noSession: true});
-  } else if (!('league_id') in req.body) {
+  } else if (!('league_id') in req.query) {
     res.status(400).json({message: 'must provide league_id when starting draft'});
   } else {
     const league_id = req.query.league_id;
@@ -149,10 +148,10 @@ router.get('/state', function(req, res, next){
     if (draft.draftStarted) {
       const toReturn = {
         currentHighBid: draft.currentHighBid,
-        currentHighBidUserId: draft.currentHighBidUserId,
+        // currentHigh: draft.currentHighBidUserId,
         availablePlayers: draft.availablePlayers,
-        users: draft.users,
-        currentTurnUserId: draft.currentTurnUserId,
+        teams: draft.teams,
+        currentBidTeamId: draft.currentBidTeamId,
         currentState: draft.currentState,
         currentNominatedPlayer: draft.currentNominatedPlayer,
         draftPaused: draft.draftPaused
@@ -248,7 +247,7 @@ function registerTimerEvents(timer, league_id, req) {
     teams[currentHighBidIndex].money_remaining -= currentHighBid;
     teams[currentHighBidIndex].remaining_roster_spots--;
 
-    // remove player from availablePlayers and add to draftedPlayers
+    // remove player from availablePlayers
 
     let draftedPlayer = draft.currentNominatedPlayer;
     draftedPlayer.draft_position = draft.draftPosition;
@@ -267,7 +266,6 @@ function registerTimerEvents(timer, league_id, req) {
         teams.splice(currentHighBidIndex, 1);
     }
 
-    draft.draftedPlayers.push(draftedPlayer);
     draft.availablePlayers.splice(draft.currentNominatedPlayerIndex, 1);
 
     if (teams.length === 0) {
@@ -278,10 +276,10 @@ function registerTimerEvents(timer, league_id, req) {
     draft.currentHighBidIndex = -1;
     draft.currentNominatedPlayerIndex = -1;
     draft.currentHighBidIndex = -1;
-    draft.currentHighBidUserId = -1;
+    // draft.currentHighBidUserId = -1;
     draft.currentHighBid = -1;
     draft.currentTurnIndex = findNextTurnIndex(draft, teams);
-    draft.currentTurnTeamId = teams[draft.currentTurnIndex].team_id;
+    draft.currentBidTeamId = teams[draft.currentTurnIndex].team_id;
     draft.currentState = 'nomination';
     emitTurnToNominateEvent(req, league_id, teams[draft.currentTurnIndex].team_id);
   });
