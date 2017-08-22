@@ -1,27 +1,32 @@
 <div class="input-group panel panel-default" id="login" aria-describedby="sizing-addon3">
   <div class="panel-body">
-  <h3 style="text-align: center;">Register New User</h3> <br>
+  <h3 style="text-align: center;">Create New League</h3> <br>
     <form >
       <fieldset class="form-group">
-        <input type="text" class="form-control" placeholder="Username" ng-model="newUser.username">
+        Name
+        <input type="text" class="form-control" ng-model="newLeague.name">
       </fieldset>
       <fieldset class="form-group">
-        <input type="password" class="form-control" placeholder="Password" ng-model="newUser.password">
+        Number of Teams
+        <input type="number" class="form-control" ng-model="newLeague.num_teams">
       </fieldset>
       <fieldset class="form-group">
-        <input type="password" class="form-control" placeholder="Confirm Password" ng-model="newUser.confirmPassword">
+        Number of Positions
+        <input type="number" class="form-control" ng-model="newLeague.num_positions">
       </fieldset>
       <fieldset class="form-group">
-        <input type="text" class="form-control" placeholder="Team Name for league" ng-model="team_name">
+        Salary Cap
+        <input type="number" class="form-control" ng-model="newLeague.salary_cap">
       </fieldset>
       <fieldset class="form-group">
-        League to Join
-      <select ng-model="chosenLeague">
-          <option ng-repeat="league in availableLeagues" value="{{league.id}}">{{league.name}}</option>
-      </select>
+        <label>
+        <input type="radio" class="form-control" ng-model="newLeague.draft_type" value="AUCTION">Auction
+      </label>
+      <label>
+        <input type="radio" class="form-control" ng-model="newLeague.draft_type" value="SNAKE">Snake
+        </label>
       </fieldset>
-      <button type="submit" class="btn btn-primary" ng-click="register()">Register</button>
-      <button class="btn btn-default btn-sm" ng-click="goToLoginPage()">Back to Login</button>
+      <button type="submit" class="btn btn-primary" ng-click="createLeague()">Create</button>
     </form>
   <div class="alert alert-danger" ng-show="hasError.value">
       <strong>Warning:</strong> {{alertMessage.value}}

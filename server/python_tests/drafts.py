@@ -33,8 +33,6 @@ c.desc = '#### start draft'
 res = d.start(league_id)
 c.check(res.status_code == 200)
 
-print user_id
-
 c.desc = '#### login as rahul'
 res = u.signout()
 session_response = u.signin('rahul', 'pw')
@@ -87,7 +85,5 @@ c.desc = '#### get state'
 res = d.state(league_id)
 c.check(res.status_code == 200)
 # print json.loads(res.content)
-
-
 
 c.finish("Teams")

@@ -16,6 +16,10 @@ angular
                 templateUrl: '/views/register.html',
                 controller: 'RegisterCtrl'
             })
+            .when('/create_league', {
+                templateUrl: '/views/create_league.html',
+                controller: 'CreateLeagueCtrl'
+            })
             .when('/draft', {
                 templateUrl: '/views/draft.html',
                 controller: 'DraftCtrl'

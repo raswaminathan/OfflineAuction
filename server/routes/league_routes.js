@@ -22,15 +22,15 @@ router.get('/', function(req, res, next){
 });
 
 router.get('/all', function(req, res, next){
-  if (!req.session.user || !('username' in req.session.user)) {
-    res.status(401).json({noSession: true});
-  } else {
+  // if (!req.session.user || !('username' in req.session.user)) {
+  //   res.status(401).json({noSession: true});
+  // } else {
     league_service.getAll().then(function(result) {
       res.status(200).json(result);
     }, function(error) {
       res.status(403).json(error);
     });
-  }
+  // }
 });
 
 router.put('/', function(req, res, next){
