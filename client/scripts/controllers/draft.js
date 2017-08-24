@@ -98,7 +98,7 @@ angular.module('OfflineAuction')
       $scope.socket.off('reset timer:1');
       $scope.socket.off('bid placed:1');
       $scope.socket.off('player nominated:1');
-      // $scope.socket.off('team turn:1');
+      $scope.socket.off('team turn:1');
       $scope.socket.off('player drafted:1');
       $scope.socket.off('draft paused:1');
       $scope.socket.off('draft resumed:1');
@@ -163,14 +163,14 @@ angular.module('OfflineAuction')
           //alert();
       });
 
-      // $scope.socket.on('team turn:1', function(data) {
-      //   if (data.team_id == $scope.team.team_id) {
-      //     $scope.isMyTurn = true;
-      //     getAllAvailablePlayers().then(function() {});
-      //     createStartingBidOptions();
-      //     $scope.$apply();
-      //   }
-      // });
+      $scope.socket.on('team turn:1', function(data) {
+        if (data.team_id == $scope.team.team_id) {
+          $scope.isMyTurn = true;
+          getAllAvailablePlayers().then(function() {});
+          createStartingBidOptions();
+          $scope.$apply();
+        }
+      });
     };
 
     $scope.showPlaceBid = function() {
