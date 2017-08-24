@@ -57,12 +57,7 @@ angular.module('OfflineAuction')
             createPlaceBidOptions();
           }
         }
-
-      }, function(error) {
-        getAllTeams();
-        getAllAvailablePlayers();
-        populateMyTeam();
-      });
+      }, function(error) {});
     };
 
     $scope.filterByPosition = function(selectedPosition) {
@@ -92,13 +87,11 @@ angular.module('OfflineAuction')
       }
     };
 
-
     function removeAllListeners() {
       $scope.socket.off('timer tick:1');
       $scope.socket.off('reset timer:1');
       $scope.socket.off('bid placed:1');
       $scope.socket.off('player nominated:1');
-      $scope.socket.off('team turn:1');
       $scope.socket.off('player drafted:1');
       $scope.socket.off('draft paused:1');
       $scope.socket.off('draft resumed:1');
@@ -155,21 +148,11 @@ angular.module('OfflineAuction')
 
       // do more here
       $scope.socket.on('player drafted:1', function(data) {
-          var playerName = data.player.first_name + " " + data.player.last_name;
-          var price = data.amount;
-          var team_name = data.team_name;
+          const playerName = data.player.first_name + " " + data.player.last_name;
+          const price = data.amount;
+          const team_name = data.team_name;
           $scope.initializePage();
-          $scope.addSuccess(playerName + " drafted by " + team_name + " for $" + price);
-          //alert();
-      });
-
-      $scope.socket.on('team turn:1', function(data) {
-        if (data.team_id == $scope.team.team_id) {
-          $scope.isMyTurn = true;
-          getAllAvailablePlayers().then(function() {});
-          createStartingBidOptions();
-          $scope.$apply();
-        }
+          $scope.addSuccess(playerName + " drafted by " + team_name + " for $" + price + ". The projected value was $" + data.player.default_value + ".");
       });
     };
 
@@ -191,9 +174,7 @@ angular.module('OfflineAuction')
     };
 
     $scope.placeBid = function() {
-      sendPlaceBidRequest().then(function(response) {
-        console.log("Bid placed");
-      });
+      sendPlaceBidRequest().then(function(response) {});
     };
 
     $scope.nominatePlayer = function() {
@@ -201,7 +182,6 @@ angular.module('OfflineAuction')
         return;
       } else {
         sendNominatePlayerRequest().then(function(response){
-          console.log("Player nominated");
           $scope.isMyTurn = false;
         });
       }

@@ -18,8 +18,6 @@ router.post('/start', function(req, res, next){
   } else {
     const league_id = req.body.league_id;
     rebuildFromDb(league_id, req).then(function(result) {
-      let draft = drafts[league_id];
-      emitTurnToNominateEvent(req, league_id, draft.teams[draft.currentTurnIndex].team_id);
       res.status(200).json({message: 'ready to go'});
     });
   }
@@ -53,7 +51,7 @@ router.post('/nominatePlayer', function(req, res, next){
       draft.currentHighBid = startingBid;
       draft.currentHighBidIndex = findTeamIndexInArray(draft.teams, team_id);
       draft.currentBidTeamId = team_id;
-      emitPlayerNominatedEvent(req, league_id, draft.currentNominatedPlayer, startingBid, team_id);
+      req.io.sockets.emit('player nominated:' + league_id, {player: draft.currentNominatedPlayer, startingBid: startingBid, team_id: team_id});
       resetAndStartTimer(draft.timer);
       draft.currentState = 'bid';
       res.status(200).json({});
@@ -184,9 +182,7 @@ router.post('/resetRound', function(req, res, next){
         stopTimer(draft.timer);
       }
       
-      resetRoundForDraft(draft);
-    
-      req.io.sockets.emit('reset round:' + league_id, {});
+      resetRoundForDraft(req, league_id);
       res.status(200).json({});
     }
   }
@@ -212,7 +208,6 @@ router.post('/resetToPosition', function(req, res, next){
       }
       league_service.reset_to_position(req.body).then(function(result) {
         rebuildFromDb(league_id, req).then(function(result) {
-          req.io.sockets.emit('reset round:' + league_id, {});
           res.status(200).json(result);
         });
       }, function(error) {
@@ -222,7 +217,8 @@ router.post('/resetToPosition', function(req, res, next){
   }
 });
 
-function resetRoundForDraft(draft) {
+function resetRoundForDraft(req, league_id) {
+  let draft = drafts[league_id];
   draft.currentHighBid = -1;
   draft.currentHighBidIndex = -1;
   draft.currentNominatedPlayer = {};
@@ -232,6 +228,8 @@ function resetRoundForDraft(draft) {
 
   draft.timerOut = false;
   draft.draftPaused = false;
+
+  req.io.sockets.emit('reset round:' + league_id, {});
 }
 
 function registerTimerEvents(timer, league_id, req) {
@@ -278,9 +276,7 @@ function registerTimerEvents(timer, league_id, req) {
       }
 
       draft.currentTurnIndex = findNextTurnIndex(draft, teams);
-      resetRoundForDraft(draft);
-
-      emitTurnToNominateEvent(req, league_id, teams[draft.currentTurnIndex].team_id);
+      resetRoundForDraft(req, league_id);
     })
   });
 
@@ -319,7 +315,6 @@ function rebuildFromDb(league_id, req) {
 
           league_service.get_all_rosters(league_id).then(function(result) {
             var players = result.results;
-            console.log("PLAYERS: " + players);
 
             for (var i = 0; i<players.length; i++) {
               var player = players[i];
@@ -357,7 +352,7 @@ function rebuildFromDb(league_id, req) {
               draft.currentTurnIndex = 0;
             }
 
-            resetRoundForDraft(draft);
+            resetRoundForDraft(req, league_id);
 
             deferred.resolve({blah: "blah"});
           })
@@ -368,12 +363,6 @@ function rebuildFromDb(league_id, req) {
 
   return deferred.promise;
 }
-
-// resetRoundForDraft(draft);
-// registerTimerEvents(draft.timer, league_id, req);
-// emitTurnToNominateEvent(req, league_id, draft.teams[draft.currentTurnIndex].team_id);
-
-// res.status(200).json({message: 'ready to go'});
 
 function resetAndStartTimer(timer) {
   if (timer.getTime() > 10 || timer.getTime() == 0) {
@@ -388,14 +377,6 @@ function resetAndStartTimer(timer) {
 
 function stopTimer(timer) {
   timer.stop();
-};
-
-function emitTurnToNominateEvent(req, league_id, team_id) {
-  req.io.sockets.emit('team turn:' + league_id, {team_id: team_id});
-};
-
-function emitPlayerNominatedEvent(req, league_id, player, startingBid, team_id) {
-  req.io.sockets.emit('player nominated:' + league_id, {player: player, startingBid: startingBid, team_id: team_id});
 };
 
 function findNextTurnIndex(draft, teams) {
