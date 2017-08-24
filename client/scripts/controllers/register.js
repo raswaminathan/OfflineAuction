@@ -24,6 +24,7 @@ angular.module('OfflineAuction')
     function init() {
       initializeNewUser();
       populateAvailableLeagues();
+      $scope.team_name = ''
       $scope.chosenLeague = '';
     }
 
