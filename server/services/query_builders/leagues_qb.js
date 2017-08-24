@@ -88,6 +88,13 @@ function start_draft(league_id) {
             .toString();
 }
 
+function get_all_rosters(league_id) {
+  return squel.select()
+            .from('roster')
+            .where('team_id IN ?', squel.select().field('id').from('team').where('league_id = ?', league_id))
+            .toString();
+}
+
 module.exports = {
   create: create,
   update: update,
@@ -97,5 +104,6 @@ module.exports = {
   get_teams: get_teams,
   get_available_players: get_available_players,
   reset_to_position: reset_to_position,
-  start_draft: start_draft
+  start_draft: start_draft,
+  get_all_rosters: get_all_rosters
 }

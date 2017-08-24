@@ -3,8 +3,8 @@ const router = express.Router();
 const Timer = require('../services/timer');
 const league_service = require('../services/leagues');
 const team_service = require('../services/teams');
+const q = require('q');
 
-const TIMER_RESET_TIME = 20;
 const drafts = {};
 
 router.post('/start', function(req, res, next){
@@ -17,43 +17,11 @@ router.post('/start', function(req, res, next){
     res.status(400).json({message: 'draft already started!!'});
   } else {
     const league_id = req.body.league_id;
-
-    league_service.start_draft(league_id).then(function(result) {
-      drafts[league_id] = {};
-      league_service.get_teams(league_id).then(function(result){
-        drafts[league_id].teams = result.results;
-        league_service.get_available_players(league_id).then(function(result){
-          let draft = drafts[league_id];
-          draft.availablePlayers = result.results;
-          draft.currentHighBid = -1;
-          draft.currentHighBidIndex = -1;
-          draft.previousHighBid = -1;
-          draft.previousHighBidIndex = -1;
-          draft.currentNominatedPlayer = {};
-          draft.currentNominatedPlayerIndex = -1;
-          draft.timer = new Timer();
-          draft.timerOut = false;
-          draft.currentTurnIndex = 0;
-          draft.currentBidTeamId = draft.teams[draft.currentTurnIndex].team_id;
-          draft.currentState = 'nomination';
-
-          /// HACK
-          let teams = draft.teams;
-          for (var i = 0; i<teams.length; i++) {
-            teams[i].remaining_roster_spots = 16;
-          }
-
-          draft.draftPosition = 1;
-          draft.draftStarted = true;
-          draft.draftPaused = false;
-
-          registerTimerEvents(draft.timer, league_id, req);
-          emitTurnToNominateEvent(req, league_id, draft.teams[draft.currentTurnIndex].team_id);
-
-          res.status(200).json({message: 'ready to go'});
-        })
-      })
-    })
+    rebuildFromDb(league_id, req).then(function(result) {
+      let draft = drafts[league_id];
+      emitTurnToNominateEvent(req, league_id, draft.teams[draft.currentTurnIndex].team_id);
+      res.status(200).json({message: 'ready to go'});
+    });
   }
 });
 
@@ -86,7 +54,7 @@ router.post('/nominatePlayer', function(req, res, next){
       draft.currentHighBidIndex = findTeamIndexInArray(draft.teams, team_id);
       draft.currentBidTeamId = team_id;
       emitPlayerNominatedEvent(req, league_id, draft.currentNominatedPlayer, startingBid, team_id);
-      resetAndStartTimer(draft.timer, TIMER_RESET_TIME);
+      resetAndStartTimer(draft.timer);
       draft.currentState = 'bid';
       res.status(200).json({});
     } else {
@@ -123,13 +91,11 @@ router.post('/placeBid', function(req, res, next){
       if (moneyLeft < 0 || moneyLeft < (team.remaining_roster_spots - 1)) {
         res.status(400).json({message: "not enough cash left"});
       } else {
-        draft.previousHighBid = draft.currentHighBid;
-        draft.previousHighBidIndex = draft.currentHighBidIndex;
         draft.currentHighBid = bid;
         draft.currentHighBidIndex = findTeamIndexInArray(draft.teams, team_id);
         draft.currentBidTeamId = team_id;
         req.io.sockets.emit('bid placed:' + league_id, {currentHighBid: draft.currentHighBid, team_id: team_id});
-        resetAndStartTimer(draft.timer, TIMER_RESET_TIME);
+        resetAndStartTimer(draft.timer);
         res.status(200).json({});
       }
     }
@@ -148,7 +114,6 @@ router.get('/state', function(req, res, next){
     if (draft.draftStarted) {
       const toReturn = {
         currentHighBid: draft.currentHighBid,
-        // currentHigh: draft.currentHighBidUserId,
         availablePlayers: draft.availablePlayers,
         teams: draft.teams,
         currentBidTeamId: draft.currentBidTeamId,
@@ -195,7 +160,7 @@ router.post('/resume', function(req, res, next){
     if (!draft.draftStarted || !draft.draftPaused || !req.session.user.username === 'admin') {
       res.status(403).json({message: "Not admin / draft not started"});
     } else {
-      resetAndStartTimer(draft.timer, TIMER_RESET_TIME);
+      resetAndStartTimer(draft.timer);
       draft.draftPaused = false;
       req.io.sockets.emit('draft resumed:' + league_id, {});
       res.status(200).json({});
@@ -218,19 +183,56 @@ router.post('/resetRound', function(req, res, next){
       if (!draft.draftPaused) {
         stopTimer(draft.timer);
       }
-      draft.currentState = 'nomination';
-      draft.draftPaused = false;
-      draft.currentHighBid = -1;
-      draft.currentHighBidIndex = -1;
-      draft.previousHighBid = -1;
-      draft.previousHighBidIndex = -1;
-      draft.currentNominatedPlayer = {};
-      draft.currentNominatedPlayerIndex = -1;
+      
+      resetRoundForDraft(draft);
+    
       req.io.sockets.emit('reset round:' + league_id, {});
       res.status(200).json({});
     }
   }
 });
+
+router.post('/resetToPosition', function(req, res, next){
+  if (!req.session.user || !('username' in req.session.user)) {
+    res.status(401).json({noSession: true});
+  } else if (!('league_id') in req.body) {
+    res.status(400).json({message: 'must provide league_id when reseting to position'});
+  } else if (!('draft_position') in req.body) {
+    res.status(400).json({message: 'must provide draft_position when reseting to position'});
+  } else {
+    const league_id = req.body.league_id;
+    const draft_position = req.body.draft_position;
+
+    let draft = drafts[league_id];
+    if (!draft.draftStarted  || !req.session.user.username === 'admin') {
+      res.status(403).json({message: "Not admin / draft not started"});
+    } else {
+      if (!draft.draftPaused) {
+        stopTimer(draft.timer);
+      }
+      league_service.reset_to_position(req.body).then(function(result) {
+        rebuildFromDb(league_id, req).then(function(result) {
+          req.io.sockets.emit('reset round:' + league_id, {});
+          res.status(200).json(result);
+        });
+      }, function(error) {
+        res.status(403).json(error);
+      });
+    }
+  }
+});
+
+function resetRoundForDraft(draft) {
+  draft.currentHighBid = -1;
+  draft.currentHighBidIndex = -1;
+  draft.currentNominatedPlayer = {};
+  draft.currentNominatedPlayerIndex = -1;
+  draft.currentBidTeamId = draft.teams[draft.currentTurnIndex].team_id;
+  draft.currentState = 'nomination';
+
+  draft.timerOut = false;
+  draft.draftPaused = false;
+}
 
 function registerTimerEvents(timer, league_id, req) {
   timer.on('tick:timer', function(time) {
@@ -246,59 +248,142 @@ function registerTimerEvents(timer, league_id, req) {
 
     teams[currentHighBidIndex].money_remaining -= currentHighBid;
     teams[currentHighBidIndex].remaining_roster_spots--;
-
-    // remove player from availablePlayers
-
     let draftedPlayer = draft.currentNominatedPlayer;
-    draftedPlayer.draft_position = draft.draftPosition;
+    draftedPlayer.draft_position = draft.draft_position;
+    draftedPlayer.nominating_turn_index = draft.currentTurnIndex;
+    
     const player_info = {
       player_id: draftedPlayer.player_id,
       team_id: teams[currentHighBidIndex].team_id,
       cost: currentHighBid,
-      draft_position: draft.draftPosition
+      draft_position: draft.draft_position,
+      nominating_turn_index: draft.currentTurnIndex
     };
 
-    req.io.sockets.emit('player drafted:' + league_id, {player: draftedPlayer, team_name: teams[currentHighBidIndex].name,
-                                            amount: draft.currentHighBid});
+    team_service.add_player(player_info).then(function(result) {
+      draft.draft_position = draft.draft_position + 1;
 
-    if (teams[currentHighBidIndex].remaining_roster_spots === 0) {
-        req.io.sockets.emit('team done:' + league_id, {team_id: teams[currentHighBidIndex].team_id});
-        teams.splice(currentHighBidIndex, 1);
-    }
+      req.io.sockets.emit('player drafted:' + league_id, {player: draftedPlayer, team_name: teams[currentHighBidIndex].name, amount: draft.currentHighBid});
 
-    draft.availablePlayers.splice(draft.currentNominatedPlayerIndex, 1);
+      if (teams[currentHighBidIndex].remaining_roster_spots === 0 || teams[currentHighBidIndex].money_remaining <= 0) {
+          req.io.sockets.emit('team done:' + league_id, {team_id: teams[currentHighBidIndex].team_id});
+          teams.splice(currentHighBidIndex, 1);
+      }
 
-    if (teams.length === 0) {
-      return;
-    }
+      draft.draftedPlayers.push(draftedPlayer);
+      draft.availablePlayers.splice(draft.currentNominatedPlayerIndex, 1);
 
-    draft.currentNominatedPlayer = {};
-    draft.currentHighBidIndex = -1;
-    draft.currentNominatedPlayerIndex = -1;
-    draft.currentHighBidIndex = -1;
-    // draft.currentHighBidUserId = -1;
-    draft.currentHighBid = -1;
-    draft.currentTurnIndex = findNextTurnIndex(draft, teams);
-    draft.currentBidTeamId = teams[draft.currentTurnIndex].team_id;
-    draft.currentState = 'nomination';
-    emitTurnToNominateEvent(req, league_id, teams[draft.currentTurnIndex].team_id);
+      if (teams.length === 0) {
+        return;
+      }
+
+      draft.currentTurnIndex = findNextTurnIndex(draft, teams);
+      resetRoundForDraft(draft);
+
+      emitTurnToNominateEvent(req, league_id, teams[draft.currentTurnIndex].team_id);
+    })
   });
 
   timer.on('reset:timer', function(time) {
+    drafts[league_id].timerOut = false;
     req.io.sockets.emit('timer reset:' + league_id, {time: time});
   });
 };
 
-function resetAndStartTimer(timer, startValue) {
-  console.log(timer.time);
-  if (timer.time / 1000 > 10) {
-    timer.reset(TIMER_RESET_TIME);
+function rebuildFromDb(league_id, req) {
+  const deferred = q.defer();
+  league_service.get(league_id).then(function(result) {
+    const league = result.results;
+    const num_positions = league.num_positions;
+    league_service.start_draft(league_id).then(function(result) {
+      drafts[league_id] = {};
+      league_service.get_teams(league_id).then(function(result){
+        drafts[league_id].teams = result.results;
+        league_service.get_available_players(league_id).then(function(result){
+          let draft = drafts[league_id];
+          draft.availablePlayers = result.results;
+
+          draft.timer = new Timer();
+          draft.draftedPlayers = [];
+          draft.currentTurnIndex = 0;
+
+          let teams = draft.teams;
+          for (var i = 0; i<teams.length; i++) {
+            teams[i].remaining_roster_spots = num_positions;
+          }
+
+          draft.draft_position = 1;
+          draft.draftStarted = true;
+
+          registerTimerEvents(draft.timer, league_id, req);
+
+          league_service.get_all_rosters(league_id).then(function(result) {
+            var players = result.results;
+            console.log("PLAYERS: " + players);
+
+            for (var i = 0; i<players.length; i++) {
+              var player = players[i];
+              var team_id = player.team_id;
+              var player_id = player.player_id;
+              var cost = player.cost;
+              var draft_position = player.draft_position;
+              var nominating_turn_index = player.nominating_turn_index;
+
+              var teamIndex = findTeamIndexInArray(teams, team_id);
+              var team = teams[teamIndex];
+
+              var playerIndex = findPlayerIndexInArray(player_id, draft.availablePlayers);
+
+              team.remaining_roster_spots--;
+              team.money_remaining = team.money_remaining - cost;
+              draft.draft_position = draft_position + 1;
+              draft.availablePlayers.splice(playerIndex, 1);
+              draft.draftedPlayers.push(player);
+            }
+
+            for (var i = teams.length-1; i>=0; i--) {
+              var team = teams[i];
+              if (team.remaining_roster_spots <= 0 || team.money_remaining <= 0) {
+                teams.splice(i, 1);
+              }
+            }
+
+            if (players.length > 0) {
+              var lastPlayer = players[players.length - 1];
+              var nominating_turn_index = lastPlayer.nominating_turn_index;
+              draft.currentTurnIndex = nominating_turn_index;
+              draft.currentTurnIndex = findNextTurnIndex(draft, teams);
+            } else {
+              draft.currentTurnIndex = 0;
+            }
+
+            resetRoundForDraft(draft);
+
+            deferred.resolve({blah: "blah"});
+          })
+        })
+      })
+    })
+  })
+
+  return deferred.promise;
+}
+
+// resetRoundForDraft(draft);
+// registerTimerEvents(draft.timer, league_id, req);
+// emitTurnToNominateEvent(req, league_id, draft.teams[draft.currentTurnIndex].team_id);
+
+// res.status(200).json({message: 'ready to go'});
+
+function resetAndStartTimer(timer) {
+  if (timer.getTime() > 10 || timer.getTime() == 0) {
+    // timer.reset(20);
+    timer.reset(5);
   } else {
-    timer.reset(10);
+    // timer.reset(10);
+    timer.reset(5);
   }
-  //timer.reset(startValue);
   timer.start();
-  timerOut = false;
 };
 
 function stopTimer(timer) {
@@ -314,7 +399,7 @@ function emitPlayerNominatedEvent(req, league_id, player, startingBid, team_id) 
 };
 
 function findNextTurnIndex(draft, teams) {
-  if (draft.currentTurnIndex === (teams.length - 1)) {
+  if (draft.currentTurnIndex >= (teams.length - 1)) {
     return 0;
   } else {
     return draft.currentTurnIndex + 1;

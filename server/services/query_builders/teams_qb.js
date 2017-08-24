@@ -52,12 +52,17 @@ function update(team) {
 // ROSTER queries
 
 function add_player(info) {
+  let nominating_turn_index = -1;
+  if ('nominating_turn_index' in info) {
+    nominating_turn_index = info.nominating_turn_index;
+  }
   return squel.insert()
             .into(ROSTER_TABLE)
             .set(TEAM_ID, info.team_id)
             .set(PLAYER_ID, info.player_id)
             .set(COST, info.cost)
             .set(DRAFT_POSITION, info.draft_position)
+            .set('nominating_turn_index', nominating_turn_index)
             .toString();
 }
 
@@ -83,7 +88,6 @@ function get_players(team_id) {
             .left_join('player_position', null, 'player.position_id = player_position.id')
             .where("team_id = ?", team_id)
             .toString();
-
 }
 
 module.exports = {

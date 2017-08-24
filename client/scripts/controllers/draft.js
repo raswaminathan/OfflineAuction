@@ -5,23 +5,7 @@
 angular.module('OfflineAuction')
   .controller('DraftCtrl', function ($scope, $http, $q) {
 
-    $scope.currentBid = 0;
-    $scope.myBid = 0;
-    $scope.timerValue = 0;
-    $scope.currentPlayer = null;
-    $scope.allTeams = [];
-    $scope.currentBidTeamId = -1;
-    $scope.availablePlayers = [];
-    $scope.isMyTurn = false;
-    $scope.chosenPlayer = -1;
-    $scope.startingBid = 1;
-    $scope.draftStarted = false;
-    $scope.done = false;
-    $scope.selectedPosition = "ALL";
     $scope.positionOptions = ["ALL", "QB", "RB", "WR", "TE", "DST", "K"];
-    $scope.playersToSelect = [];
-    $scope.draftPaused = false;
-    $scope.team = {};
 
     $scope.initializePage = function() {
       $scope.currentBid = 0;
@@ -39,15 +23,13 @@ angular.module('OfflineAuction')
       $scope.playersToSelect = [];
       $scope.selectedPosition = "ALL";
       $scope.draftPaused = false;
+      $scope.team = {};
 
       removeAllListeners();
       addAllListeners();
 
       sendGetStateRequest().then(function(response) {
         const draft = response.data;
-
-        console.log(draft);
-
         $scope.draftStarted = true;
         $scope.draftPaused = draft.draftPaused;
         $scope.currentBid = draft.currentHighBid < 0 ? 0 : draft.currentHighBid;
@@ -116,7 +98,7 @@ angular.module('OfflineAuction')
       $scope.socket.off('reset timer:1');
       $scope.socket.off('bid placed:1');
       $scope.socket.off('player nominated:1');
-      $scope.socket.off('team turn:1');
+      // $scope.socket.off('team turn:1');
       $scope.socket.off('player drafted:1');
       $scope.socket.off('draft paused:1');
       $scope.socket.off('draft resumed:1');
@@ -181,14 +163,14 @@ angular.module('OfflineAuction')
           //alert();
       });
 
-      $scope.socket.on('team turn:1', function(data) {
-        console.log('IN TEAM TURN');
-        if (data.team_id == $scope.team.team_id) {
-          $scope.isMyTurn = true;
-          getAllAvailablePlayers().then(function() {});
-          createStartingBidOptions();
-        }
-      });
+      // $scope.socket.on('team turn:1', function(data) {
+      //   if (data.team_id == $scope.team.team_id) {
+      //     $scope.isMyTurn = true;
+      //     getAllAvailablePlayers().then(function() {});
+      //     createStartingBidOptions();
+      //     $scope.$apply();
+      //   }
+      // });
     };
 
     $scope.showPlaceBid = function() {
@@ -250,7 +232,7 @@ angular.module('OfflineAuction')
       const reqBody = {
         league_id: 1,
         bid: $scope.myBid,
-        team_id: $scope.myTeamId
+        team_id: $scope.team.team_id
       };
       $http.post('/draft/placeBid', reqBody).then(function(response) {
           deferred.resolve();
