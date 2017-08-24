@@ -70,6 +70,7 @@ function get_available_players(league_id) {
             .field('player.default_value')
             .left_join('player_position', null, 'player.position_id = player_position.id')
             .where('player.id NOT IN ?', squel.select().field('player_id').from('roster').where('team_id IN ?', squel.select().field('id').from('team').where('league_id = ?', league_id)))
+            .order('player.default_value', false)
             .toString();
 };
 

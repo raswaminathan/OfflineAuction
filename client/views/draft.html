@@ -1,24 +1,25 @@
 <div class="panel panel-default" style="width: 40%;" id="login" aria-describedby="sizing-addon3">
-    <div class="panel-body">
-        <h2> {{user.username}} (Max Bid: ${{user.maxBid}})</h2>
+    <div ng-show="!draftStarted">
+        DRAFT NOT STARTED YET!
+    </div>
+    <div ng-show="draftStarted" class="panel-body">
+        <h2> {{team.name}} (Max Bid: ${{team.maxBid}})</h2>
+        <h2> Num Spots Remaining: {{team.remaining_roster_spots}} </h2>
         <h1 style="color: red; font-size: 164px">{{timerValue}}</h1>
-        <h2 style="color: green; font-size: 50px">${{currentBid}} - {{currentBidUser()}} </h2>
+        <h2 style="color: green; font-size: 50px">${{currentBid}} - {{currentBidTeam()}} </h2>
 
-        <h2> Player: {{currentPlayer.first_name}} {{currentPlayer.last_name}} - {{currentPlayer.position}} - {{currentPlayer.team}} - (${{currentPlayer.value}})</h2>
-        
-        <!-- <h2>ESPN VALUE:  </h2> -->
-        <!-- <h2> Num Spots Remaining: {{user.remaining_roster_spots}} </h2> -->
+        <h2> Player: {{currentPlayer.first_name}} {{currentPlayer.last_name}} - {{currentPlayer.position}} - {{currentPlayer.team}} - (${{currentPlayer.default_value}})</h2>
 
-        <h2 ng-show="done">YOU DONE BRUH</h2>
+        <h2 ng-show="done">YOU ARE FINISHED</h2>
 
         <div ng-show="isMyTurn">
-            <div ng-repeat="n in positionOptions">
                 <label>
-            <input name="positions" ng-change="filterByPosition(n)" type="radio" ng-model="selectedPosition" value="{{n}}" ng-value="{{n}}" /> {{n}}  </br>
+            <select ng-model="selectedPosition" ng-change="filterByPosition(selectedPosition)">
+              <option ng-repeat="position in positionOptions" value="{{position}}">{{position}}</option>
+            </select>
         </label>
-             </div>
             <select ng-model="chosenPlayer">
-              <option ng-repeat="player in playersToSelect" value="{{player.player_id}}">{{player.first_name}} {{player.last_name}} - ${{player.value}}</option>
+              <option ng-repeat="player in playersToSelect" value="{{player.player_id}}">{{player.first_name}} {{player.last_name}} - ${{player.default_value}}</option>
             </select>
 
             <select ng-model="startingBid">
@@ -42,11 +43,10 @@
     </div>
     <div class="alert alert-success" ng-show="hasSuccess.value">
       <strong>Player Drafted: </strong> {{successMessage.value}}
+      <!-- <img ng-src="images/neck_tub.png" height:"2" width:"2"> -->
+      <!-- </IMG> -->
       <a class="glyphicon glyphicon-remove" aria-hidden="true" ng-click="clearSuccess()"></a>
     </div>
-
-    <!-- <button class="btn btn-primary" ng-disabled="draftStarted" ng-click="startDraft()"> Start Draft </button> -->
-
 </div>
 
 
