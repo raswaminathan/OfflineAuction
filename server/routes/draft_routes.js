@@ -248,14 +248,14 @@ function registerTimerEvents(timer, league_id, req) {
     teams[currentHighBidIndex].remaining_roster_spots--;
     let draftedPlayer = draft.currentNominatedPlayer;
     draftedPlayer.draft_position = draft.draft_position;
-    draftedPlayer.nominating_turn_index = draft.currentTurnIndex;
+    draftedPlayer.nominating_team_id = teams[draft.currentTurnIndex].team_id;
     
     const player_info = {
       player_id: draftedPlayer.player_id,
       team_id: teams[currentHighBidIndex].team_id,
       cost: currentHighBid,
       draft_position: draft.draft_position,
-      nominating_turn_index: draft.currentTurnIndex
+      nominating_team_id: teams[draft.currentTurnIndex].team_id
     };
 
     team_service.add_player(player_info).then(function(result) {
@@ -322,7 +322,7 @@ function rebuildFromDb(league_id, req) {
               var player_id = player.player_id;
               var cost = player.cost;
               var draft_position = player.draft_position;
-              var nominating_turn_index = player.nominating_turn_index;
+              var nominating_team_id = player.nominating_team_id;
 
               var teamIndex = findTeamIndexInArray(teams, team_id);
               var team = teams[teamIndex];
@@ -345,8 +345,8 @@ function rebuildFromDb(league_id, req) {
 
             if (players.length > 0) {
               var lastPlayer = players[players.length - 1];
-              var nominating_turn_index = lastPlayer.nominating_turn_index;
-              draft.currentTurnIndex = nominating_turn_index;
+              var nominating_team_id = lastPlayer.nominating_team_id;
+              draft.currentTurnIndex = findTeamIndexInArray(teams, nominating_team_id);
               draft.currentTurnIndex = findNextTurnIndex(draft, teams);
             } else {
               draft.currentTurnIndex = 0;

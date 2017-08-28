@@ -86,4 +86,4 @@ res = d.state(league_id)
 c.check(res.status_code == 200)
 # print json.loads(res.content)
 
-c.finish("Teams")
+c.finish("Drafts")

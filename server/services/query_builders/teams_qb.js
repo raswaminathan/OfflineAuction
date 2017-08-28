@@ -22,13 +22,18 @@ function get(id) {
 };
 
 function create(team) {
-  return squel.insert()
+  let a = squel.insert()
             .into(TEAM_TABLE)
             .set(NAME, team.name)
             .set(USER_ID, team.user_id)
             .set(LEAGUE_ID, team.league_id)
-            .set(MONEY_REMAINING, team.money_remaining)
-            .toString();
+            .set(MONEY_REMAINING, team.money_remaining);
+
+  if ('image' in team) {
+    a.set('image', team.image)
+  }
+
+  return a.toString();
 };
 
 function del(id) {
@@ -39,22 +44,27 @@ function del(id) {
 };
 
 function update(team) {
-  return squel.update()
+  let a = squel.update()
             .table(TEAM_TABLE)
             .where("id = ?", team.id)
             .set(NAME, team.name)
             .set(USER_ID, team.user_id)
             .set(LEAGUE_ID, team.league_id)
-            .set(MONEY_REMAINING, team.money_remaining)
-            .toString();
+            .set(MONEY_REMAINING, team.money_remaining);
+
+  if ('image' in team) {
+    a.set('image', team.image)
+  }
+
+  return a.toString();
 };
 
 // ROSTER queries
 
 function add_player(info) {
-  let nominating_turn_index = -1;
-  if ('nominating_turn_index' in info) {
-    nominating_turn_index = info.nominating_turn_index;
+  let nominating_team_id = -1;
+  if ('nominating_team_id' in info) {
+    nominating_team_id = info.nominating_team_id;
   }
   return squel.insert()
             .into(ROSTER_TABLE)
@@ -62,7 +72,7 @@ function add_player(info) {
             .set(PLAYER_ID, info.player_id)
             .set(COST, info.cost)
             .set(DRAFT_POSITION, info.draft_position)
-            .set('nominating_turn_index', nominating_turn_index)
+            .set('nominating_team_id', nominating_team_id)
             .toString();
 }
 
@@ -87,6 +97,7 @@ function get_players(team_id) {
             .left_join('player', null, 'roster.player_id = player.id')
             .left_join('player_position', null, 'player.position_id = player_position.id')
             .where("team_id = ?", team_id)
+            .order('roster.cost', false)
             .toString();
 }
 

@@ -1,10 +1,10 @@
-var express = require('express');
-var router = express.Router();
-var app = express();
-var globals = require('../globals')
+const express = require('express');
+const router = express.Router();
+const app = express();
+const globals = require('../globals')
 
 // sendFile needs full path
-var basePath =  globals.clientBasePath + '/videos';
+const basePath =  globals.clientBasePath + '/videos';
 
 router.get('/*.mp4', function(req, res, next){
   res.sendFile(basePath + req.path);

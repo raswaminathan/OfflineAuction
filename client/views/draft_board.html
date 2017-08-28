@@ -1,29 +1,42 @@
 <div class="panel panel-default" style="width: 40%;" id="login" aria-describedby="sizing-addon3">
-    <div class="panel-body">
-
-    </div>
 
     <div class="panel-body">
         <button class="btn btn-primary" ng-disabled="draftStarted" ng-click="startDraft()"> Start Draft </button>
     </div>
 
     <div class="panel-body">
-        <button class="btn btn-primary"  ng-click="pauseDraft()"> Pause Draft </button>
+        <button ng-disabled="disablePauseDraftBtn()" class="btn btn-primary"  ng-click="pauseDraft()"> Pause Draft </button>
     </div>
 
     <div class="panel-body">
-        <button class="btn btn-primary"  ng-click="resumeDraft()"> Resume Draft </button>
+        <button ng-disabled="!draftPaused" class="btn btn-primary"  ng-click="resumeDraft()"> Resume Draft </button>
     </div>
 
     <div class="panel-body">
-        <button class="btn btn-primary"  ng-click="resetRound()"> Reset Round </button>
+        <button ng-disabled="!draftStarted" class="btn btn-primary"  ng-click="resetRound()"> Reset Round </button>
     </div>
 
     <div class="panel-body">
       Position to Reset to 
         <input type="number" class="form-control" ng-model="draft_position">
-        <button class="btn btn-primary"  ng-click="resetToPosition()"> Reset To Position </button>
+        <button ng-disabled="!draftStarted" class="btn btn-primary"  ng-click="resetToPosition()"> Reset To Position </button>
     </div>
 
+    <div class="panel-body">
+        <h4>Choose a team to look at: </h4>
+
+      <select ng-model="selectedTeamId" ng-change="filterByTeam(selectedTeamId)">
+          <option ng-repeat="team in allTeams" value="{{team.team_id}}">{{team.name}}</option>
+      </select>
+    </div>
+
+    <div ng-show="selectedTeamId != null" class="panel-body">
+      <h4>Money spent: ${{teamMoneySpent}}</h4>
+      <h4>Roster spots used: {{teamRosterSpots}}</h4>
+      <br>
+      <h5 style="color: green" ng-repeat="player in teamPlayers">
+        {{player.first_name}} {{player.last_name}} {{player.position}} {{player.team}} -- ${{player.cost}}
+      </h5>
+    </div>
 
 </div>

@@ -24,6 +24,7 @@ angular.module('OfflineAuction')
       $scope.selectedPosition = "ALL";
       $scope.draftPaused = false;
       $scope.team = {};
+      $scope.draftState = 'nomination';
 
       removeAllListeners();
       addAllListeners();
@@ -53,6 +54,7 @@ angular.module('OfflineAuction')
           }
 
           if (draft.currentState === 'bid') {
+            $scope.draftState = 'bid';
             $scope.currentPlayer = draft.currentNominatedPlayer;
             createPlaceBidOptions();
           }
@@ -131,6 +133,7 @@ angular.module('OfflineAuction')
       });
 
       $scope.socket.on('player nominated:1', function(data) {
+        $scope.draftState = 'bid';
         $scope.currentPlayer = data.player;
         $scope.currentBid = data.startingBid;
         $scope.currentBidTeamId = data.team_id;
@@ -153,12 +156,17 @@ angular.module('OfflineAuction')
           const team_name = data.team_name;
           $scope.initializePage();
           $scope.addSuccess(playerName + " drafted by " + team_name + " for $" + price + ". The projected value was $" + data.player.default_value + ".");
+          $scope.playAudio();
       });
     };
 
     $scope.showPlaceBid = function() {
       return !($scope.draftPaused) && !($scope.done) && !($scope.currentPlayer == null || $scope.currentPlayer == {}) && ($scope.team.team_id != $scope.currentBidTeamId);
     };
+
+    $scope.isNomination = function() {
+      return $scope.draftState === 'nomination';
+    }
 
     $scope.currentBidTeam = function() {
       return findTeamIndex($scope.currentBidTeamId) == -1 ? "" : $scope.allTeams[findTeamIndex($scope.currentBidTeamId)].name;
@@ -187,6 +195,11 @@ angular.module('OfflineAuction')
       }
     };
 
+    $scope.playAudio = function() {
+      const audio = new Audio('videos/ooh_neck.mp4');
+      audio.play();
+    };
+
     function populateMyTeam() {
       for (var i = 0; i<$scope.allTeams.length; i++) {
         if ($scope.allTeams[i].user_id == $scope.user.user_id){
@@ -195,17 +208,6 @@ angular.module('OfflineAuction')
         }
       }
     }
-
-    function getAllTeams() {
-      const deferred = $q.defer();
-      $http.get('/league/teams?league_id=1').then(function(response) {
-        $scope.allTeams = response.data.results;
-        deferred.resolve();
-      }, function(error) {
-        deferred.reject();
-      });
-      return deferred.promise;
-    };
 
     function sendPlaceBidRequest() {
       const deferred = $q.defer();
