@@ -1,18 +1,20 @@
-<div class="panel panel-default" style="width: 40%;" id="login" aria-describedby="sizing-addon3">
+<div class="panel panel-default" style="width: 90%;" id="login" aria-describedby="sizing-addon3">
     <div ng-show="!draftStarted">
         DRAFT NOT STARTED YET!
     </div>
     <div ng-show="draftStarted" class="panel-body">
-        <h2> {{team.name}} (Max Bid: ${{team.maxBid}})</h2>
+        <h1> Your Team: {{team.name}}</h1>
         <h2> Num Spots Remaining: {{team.remaining_roster_spots}} </h2>
-        <h1 style="color: red; font-size: 164px">{{timerValue}}</h1>
-        <h2 style="color: green; font-size: 50px">${{currentBid}} - {{currentBidTeam()}} </h2>
+        <h2> Max Bid: ${{team.maxBid}}<h2>
+        <h2 style="color: red" ng-show="isNomination()">Waiting for nomination by {{currentBidTeam()}}...<h2>
+        <h1 ng-show="!isNomination()" style="color: red; font-size: 164px">{{timerValue}}</h1>
+        <h2 ng-show="!isNomination()" style="color: green; font-size: 50px">${{currentBid}} - {{currentBidTeam()}} </h2>
 
-        <h2> Player: {{currentPlayer.first_name}} {{currentPlayer.last_name}} - {{currentPlayer.position}} - {{currentPlayer.team}} - (${{currentPlayer.default_value}})</h2>
+        <h2 ng-show="!isNomination()"> Player: {{currentPlayer.first_name}} {{currentPlayer.last_name}} - {{currentPlayer.position}} - {{currentPlayer.team}} - (${{currentPlayer.default_value}})</h2>
 
         <h2 ng-show="done">YOU ARE FINISHED</h2>
 
-        <div ng-show="isMyTurn">
+        <div>
                 <label>
             <select ng-model="selectedPosition" ng-change="filterByPosition(selectedPosition)">
               <option ng-repeat="position in positionOptions" value="{{position}}">{{position}}</option>
@@ -22,11 +24,11 @@
               <option ng-repeat="player in playersToSelect" value="{{player.player_id}}">{{player.first_name}} {{player.last_name}} - ${{player.default_value}}</option>
             </select>
 
-            <select ng-model="startingBid">
+            <select ng-show="isMyTurn" ng-model="startingBid">
                 <option ng-repeat="option in startingBidOptions" value="{{option}}">${{option}}</option>
             </select>
 
-            <button class="btn btn-primary" ng-click="nominatePlayer()"> Nominate Player </button>
+            <button ng-show="isMyTurn" class="btn btn-primary" ng-click="nominatePlayer()"> Nominate Player </button>
         </div>
     </div>
 
@@ -41,9 +43,9 @@
       <strong>Warning:</strong> {{alertMessage.value}}
       <a class="glyphicon glyphicon-remove" aria-hidden="true" ng-click="clearError()"></a>
     </div>
+    <img ng-src="images/neck_tub.png" style="height: 500px; width: 500px;" ng-show="hasSuccess.value">
     <div class="alert alert-success" ng-show="hasSuccess.value">
       <strong>Player Drafted: </strong> {{successMessage.value}}
-      <!-- <img ng-src="images/neck_tub.png" height:"2" width:"2"> -->
       <!-- </IMG> -->
       <a class="glyphicon glyphicon-remove" aria-hidden="true" ng-click="clearSuccess()"></a>
     </div>

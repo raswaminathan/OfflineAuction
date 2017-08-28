@@ -18,6 +18,7 @@ const league_routes = require('./routes/league_routes');
 const team_routes = require('./routes/team_routes');
 const draft_routes = require('./routes/draft_routes');
 const image_routes = require('./routes/images');
+const audio_routes = require('./routes/audio');
 const video_routes = require('./routes/videos');
 const script_routes = require('./routes/scripts');
 const node_modules_routes = require('./routes/node_modules');

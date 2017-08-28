@@ -79,8 +79,8 @@ c.desc = '#### both players now exist on team'
 res = t.get_players(id)
 c.check(res.status_code == 200)
 c.check(len(json.loads(res.content)['results']) == 2)
-c.check(json.loads(res.content)['results'][0]['cost'] == 20)
-c.check(json.loads(res.content)['results'][1]['cost'] == 30)
+c.check(json.loads(res.content)['results'][0]['cost'] == 30)
+c.check(json.loads(res.content)['results'][1]['cost'] == 20)
 
 c.desc = '#### get all available players in league returns correct number'
 res = l.get_available_players(league_id)
